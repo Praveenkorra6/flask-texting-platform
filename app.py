@@ -15,6 +15,7 @@ Session(app)
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
+# Normalize phone numbers
 def normalize_us_number(raw):
     if pd.isna(raw):
         return None
@@ -30,13 +31,22 @@ def eventcreate():
     step = request.args.get('step', '1')
 
     if request.method == 'POST':
-        if step == '2':
-            event_name = request.form.get("event_name")
-            project_code = request.form.get("project_code")
-            if not event_name or not project_code:
-                return "Missing data", 400
-            session['event_name'] = event_name
-            session['project_code'] = project_code
+        if step == '1':
+            session['event_name'] = request.form['event_name']
+            session['project_code'] = request.form['project_code']
+            return redirect(url_for('eventcreate', step='2'))
+
+        elif step == '2':
+            file = request.files['recipient_file']
+            if file:
+                filename = secure_filename(file.filename)
+                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(path)
+                session['recipient_file'] = path
+
+                df = pd.read_csv(path, dtype=str)
+                columns = df.columns.tolist()
+                session['csv_columns'] = columns
             return redirect(url_for('eventcreate', step='2'))
 
         elif step == '3':
@@ -54,7 +64,7 @@ def eventcreate():
             df['clean_phone'] = df[phone_col].apply(normalize_us_number)
             df = df[df['clean_phone'].notnull() & df[url_col].notnull() & (df[url_col].str.strip() != '')]
 
-            session['total'] = len(df) + len(df[df['clean_phone'].isnull()])
+            session['total'] = len(pd.read_csv(recipient_file))
             session['valid'] = len(df)
             session['removed'] = session['total'] - session['valid']
 
@@ -62,25 +72,25 @@ def eventcreate():
             df.to_csv(validated_path, index=False)
             session['validated_file'] = validated_path
 
-            return redirect(url_for('eventcreate', step='3'))
+            return redirect(url_for('eventcreate', step='4'))
 
         elif step == '4':
             session['event_date'] = request.form['event_date']
             session['event_time'] = request.form['event_time']
             session['timezone'] = request.form['timezone']
-            return redirect(url_for('eventcreate', step='4'))
+            return redirect(url_for('eventcreate', step='5'))
 
         elif step == '5':
             session['message_body'] = request.form['message_body']
             session['image_url'] = request.form.get('image_url')
-            return redirect(url_for('eventcreate', step='5'))
+            return redirect(url_for('eventcreate', step='6'))
 
         elif step == '6':
             from_file = request.files['from_file']
             from_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(from_file.filename))
             from_file.save(from_path)
             session['from_numbers_file'] = from_path
-            return redirect(url_for('eventcreate', step='6'))
+            return redirect(url_for('eventcreate', step='7'))
 
         elif step == '7':
             session['approver_name'] = request.form['approver_name']
@@ -92,13 +102,15 @@ def eventcreate():
         return render_template('eventcreate.html', step='1')
 
     elif step == '2':
-        phone_columns = url_columns = first_columns = last_columns = []
-
-        if 'csv_columns' in session:
-            phone_columns = url_columns = first_columns = last_columns = session['csv_columns']
-
-        return render_template('eventcreate.html', step='2', phone_columns=phone_columns,
-                               url_columns=url_columns, first_columns=first_columns, last_columns=last_columns)
+        columns = session.get('csv_columns', [])
+        return render_template(
+            'eventcreate.html',
+            step='2',
+            phone_columns=columns,
+            url_columns=columns,
+            first_columns=columns,
+            last_columns=columns
+        )
 
     elif step == '3':
         return render_template('eventcreate.html', step='3')
@@ -113,15 +125,19 @@ def eventcreate():
         return render_template('eventcreate.html', step='6')
 
     elif step == '7':
-        return render_template('eventcreate.html', step='7', total=session.get('total'),
-                               valid=session.get('valid'), removed=session.get('removed'),
-                               send_time=f"{session.get('event_date')} {session.get('event_time')} {session.get('timezone')}")
+        return render_template(
+            'eventcreate.html',
+            step='7',
+            total=session.get('total'),
+            valid=session.get('valid'),
+            removed=session.get('removed'),
+            send_time=f"{session.get('event_date')} {session.get('event_time')} {session.get('timezone')}"
+        )
 
     return redirect(url_for('eventcreate'))
 
 @app.route('/eventcreate/commit', methods=['POST'])
 def eventcreate_commit():
-    # Placeholder for actual commit processing logic
     return "✅ Campaign committed. Ready for manual message sending."
 
 if __name__ == '__main__':
