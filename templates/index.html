@@ -1,17 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Texting Platform</title>
+    <title>Texting Platform - Upload & Map</title>
 </head>
 <body>
-    <h1>Welcome to the Texting Platform</h1>
-    <form method="POST">
-        <label for="message">Enter Message:</label><br>
-        <textarea name="message" rows="5" cols="40"></textarea><br><br>
-        <input type="submit" value="Send (not active)">
+    <h2>Step 1: Upload Recipient CSV</h2>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <label>Select CSV file:</label><br>
+        <input type="file" name="csv_file" required><br><br>
+        <input type="submit" value="Upload CSV">
     </form>
-    {% if message %}
-    <p><strong>You entered:</strong> {{ message }}</p>
+
+    {% if columns %}
+        <h3>Step 2: Map Columns</h3>
+        <form method="post" action="/map">
+            <label>Map Phone Number Column (required):</label><br>
+            <select name="phone_column" required>
+                {% for col in columns %}
+                    <option value="{{ col }}">{{ col }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label>Map URL Column (required):</label><br>
+            <select name="url_column" required>
+                {% for col in columns %}
+                    <option value="{{ col }}">{{ col }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <input type="submit" value="Validate & Continue">
+        </form>
+    {% endif %}
+
+    {% if summary %}
+        <h3>✅ Upload Summary</h3>
+        <p>Total records in file: {{ summary.total }}</p>
+        <p>✅ Valid US phone numbers: {{ summary.valid }}</p>
+        <p>❌ Invalid/removed numbers: {{ summary.invalid }}</p>
     {% endif %}
 </body>
 </html>
