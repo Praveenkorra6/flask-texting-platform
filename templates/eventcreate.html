@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
     <title>Event Creation Wizard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>Create Event</h1>
 
-    <!-- STEP 1: Event Info -->
+    <!-- Optional: Step Indicator -->
+    <div class="step-indicator">
+        {% if step %} Step {{ step }} of 7 {% endif %}
+    </div>
+
+    <!-- STEP 1 -->
     <div class="step" id="step1">
         <h2>Step 1: Event Information</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=2) }}">
@@ -21,7 +27,7 @@
         </form>
     </div>
 
-    <!-- STEP 2: Upload Universe File -->
+    <!-- STEP 2 -->
     <div class="step" id="step2">
         <h2>Step 2: Upload and Map Universe</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=3) }}" enctype="multipart/form-data">
@@ -29,14 +35,14 @@
             <input type="file" name="recipient_file" required><br><br>
 
             <label>Map Phone Column:</label>
-            <select name="phone_column">
+            <select name="phone_column" required>
                 {% for col in phone_columns %}
                 <option value="{{ col }}">{{ col }}</option>
                 {% endfor %}
             </select><br><br>
 
             <label>Map URL Column:</label>
-            <select name="url_column">
+            <select name="url_column" required>
                 {% for col in url_columns %}
                 <option value="{{ col }}">{{ col }}</option>
                 {% endfor %}
@@ -63,7 +69,7 @@
         </form>
     </div>
 
-    <!-- STEP 3: Set Schedule -->
+    <!-- STEP 3 -->
     <div class="step" id="step3">
         <h2>Step 3: Set Schedule</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=4) }}">
@@ -74,7 +80,7 @@
             <input type="time" name="event_time" required><br><br>
 
             <label>Timezone:</label>
-            <select name="timezone">
+            <select name="timezone" required>
                 <option value="EST">EST</option>
                 <option value="CST">CST</option>
                 <option value="MST">MST</option>
@@ -88,7 +94,7 @@
         </form>
     </div>
 
-    <!-- STEP 4: Message Setup -->
+    <!-- STEP 4 -->
     <div class="step" id="step4">
         <h2>Step 4: Message Content</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=5) }}">
@@ -105,7 +111,7 @@
         </form>
     </div>
 
-    <!-- STEP 5: Upload From Numbers -->
+    <!-- STEP 5 -->
     <div class="step" id="step5">
         <h2>Step 5: Upload Sender Numbers</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=6) }}" enctype="multipart/form-data">
@@ -119,7 +125,7 @@
         </form>
     </div>
 
-    <!-- STEP 6: Approvers -->
+    <!-- STEP 6 -->
     <div class="step" id="step6">
         <h2>Step 6: Approvers</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=7) }}">
@@ -135,7 +141,7 @@
         </form>
     </div>
 
-    <!-- STEP 7: Commit for Processing -->
+    <!-- STEP 7 -->
     <div class="step" id="step7">
         <h2>Step 7: Final Summary</h2>
         <p>Total recipients uploaded: {{ total }}</p>
