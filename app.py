@@ -138,7 +138,7 @@ def eventcreate():
 
 @app.route('/eventcreate/commit', methods=['POST'])
 def eventcreate_commit():
-    return "✅ Campaign committed. Ready for manual message sending."
+    return "\u2705 Campaign committed. Ready for manual message sending."
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
