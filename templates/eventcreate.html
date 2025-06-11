@@ -10,7 +10,7 @@
     <!-- STEP 1: Event Info -->
     <div class="step" id="step1">
         <h2>Step 1: Event Information</h2>
-        <form method="POST" action="{{ url_for('eventcreate') }}?step=2">
+        <form method="POST" action="{{ url_for('eventcreate', step=2) }}">
             <label>Event Name:</label><br>
             <input type="text" name="event_name" required><br><br>
             <label>Project Code:</label><br>
