@@ -1,12 +1,18 @@
 from flask import Flask, render_template, request, redirect, session, url_for
+from flask_session import Session
 import pandas as pd
 import os
 import re
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
+
 app = Flask(__name__)
 app.secret_key = 'supersecret'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['SESSION_TYPE'] = 'filesystem'  # ✅ Required for Render + Session
+Session(app)  # ✅ Initialize server-side session
+
 
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
