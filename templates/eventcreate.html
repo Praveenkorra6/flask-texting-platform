@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Creation Wizard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .step { display: none; }
+        .step.active { display: block; }
+        .nav-buttons { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Create Event</h1>
+
+    <!-- STEP 1: Event Info -->
+    <div class="step" id="step1">
+        <h2>Step 1: Event Information</h2>
+        <form method="POST" action="/eventcreate?step=2">
+            <label>Event Name:</label><br>
+            <input type="text" name="event_name" required><br><br>
+            <label>Project Code:</label><br>
+            <input type="text" name="project_code" required><br><br>
+            <div class="nav-buttons">
+                <button type="submit">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- STEP 2: Upload Universe File -->
+    <div class="step" id="step2">
+        <h2>Step 2: Upload and Map Universe</h2>
+        <form method="POST" action="/eventcreate?step=3" enctype="multipart/form-data">
+            <label>Upload Recipient CSV:</label><br>
+            <input type="file" name="recipient_file" required><br><br>
+
+            <label>Map Phone Column:</label>
+            <select name="phone_column">{{ phone_columns }}</select><br><br>
+
+            <label>Map URL Column:</label>
+            <select name="url_column">{{ url_columns }}</select><br><br>
+
+            <label>First Name Column (optional):</label>
+            <select name="first_name_column">{{ first_columns }}</select><br><br>
+
+            <label>Last Name Column (optional):</label>
+            <select name="last_name_column">{{ last_columns }}</select><br><br>
+
+            <div class="nav-buttons">
+                <a href="/eventcreate?step=1">Back</a>
+                <button type="submit">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- STEP 3: Set Schedule -->
+    <div class="step" id="step3">
+        <h2>Step 3: Set Schedule</h2>
+        <form method="POST" action="/eventcreate?step=4">
+            <label>Event Date:</label>
+            <input type="date" name="event_date" required><br><br>
+
+            <label>Event Time:</label>
+            <input type="time" name="event_time" required><br><br>
+
+            <label>Timezone:</label>
+            <select name="timezone">
+                <option value="EST">EST</option>
+                <option value="CST">CST</option>
+                <option value="MST">MST</option>
+                <option value="PST">PST</option>
+            </select><br><br>
+
+            <div class="nav-buttons">
+                <a href="/eventcreate?step=2">Back</a>
+                <button type="submit">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- STEP 4: Message Setup -->
+    <div class="step" id="step4">
+        <h2>Step 4: Message Content</h2>
+        <form method="POST" action="/eventcreate?step=5">
+            <label>Message Template:</label><br>
+            <textarea name="message_body" rows="5" cols="60" required></textarea><br><br>
+
+            <label>Image Link (optional):</label>
+            <input type="text" name="image_url"><br><br>
+
+            <div class="nav-buttons">
+                <a href="/eventcreate?step=3">Back</a>
+                <button type="submit">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- STEP 5: Upload From Numbers -->
+    <div class="step" id="step5">
+        <h2>Step 5: Upload Sender Numbers</h2>
+        <form method="POST" action="/eventcreate?step=6" enctype="multipart/form-data">
+            <label>Upload From-Numbers File (CSV or TXT):</label><br>
+            <input type="file" name="from_file" required><br><br>
+
+            <div class="nav-buttons">
+                <a href="/eventcreate?step=4">Back</a>
+                <button type="submit">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- STEP 6: Approvers -->
+    <div class="step" id="step6">
+        <h2>Step 6: Approvers</h2>
+        <form method="POST" action="/eventcreate?step=7">
+            <label>Approver Name:</label><br>
+            <input type="text" name="approver_name" required><br><br>
+            <label>Approver Phone Number:</label><br>
+            <input type="text" name="approver_phone" required><br><br>
+
+            <div class="nav-buttons">
+                <a href="/eventcreate?step=5">Back</a>
+                <button type="submit">Next</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- STEP 7: Commit for Processing -->
+    <div class="step" id="step7">
+        <h2>Step 7: Final Summary</h2>
+        <p>Total recipients uploaded: {{ total }}</p>
+        <p>Valid phone numbers: {{ valid }}</p>
+        <p>Removed (invalid or opted-out): {{ removed }}</p>
+        <p>Scheduled send time: {{ send_time }}</p>
+
+        <form method="POST" action="/eventcreate/commit">
+            <button type="submit">Commit for Processing</button>
+        </form>
+
+        <div class="nav-buttons">
+            <a href="/eventcreate?step=6">Back</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const step = urlParams.get('step') || '1';
+        document.getElementById('step' + step).classList.add('active');
+    </script>
+</body>
+</html>
