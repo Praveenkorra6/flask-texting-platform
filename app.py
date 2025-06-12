@@ -127,53 +127,53 @@ def eventcreate():
                 return redirect(url_for('eventcreate', step='7'))
             return render_template('eventcreate.html', step='6')
 
-    elif step == '7':
-        if request.method == 'POST':
-            session['event_saved'] = True
-            return redirect(url_for('eventcreate', step='8'))
+        elif step == '7':
+            if request.method == 'POST':
+                session['event_saved'] = True
+                return redirect(url_for('eventcreate', step='8'))
+        
+            if not session.get('approver_name') or not session.get('approver_phone'):
+                return redirect(url_for('eventcreate', step='6'))
+        
+            return render_template('eventcreate.html', step='7',
+                                   total=session.get('total'),
+                                   valid=session.get('valid'),
+                                   removed=session.get('removed'),
+                                   event_name=session.get('event_name'),
+                                   project_code=session.get('project_code'),
+                                   send_time=f"{session.get('event_date')} {session.get('event_time')} {session.get('timezone')}",
+                                   approver_name=session.get('approver_name'),
+                                   approver_phone=session.get('approver_phone'))
     
-        if not session.get('approver_name') or not session.get('approver_phone'):
-            return redirect(url_for('eventcreate', step='6'))
-    
-        return render_template('eventcreate.html', step='7',
-                               total=session.get('total'),
-                               valid=session.get('valid'),
-                               removed=session.get('removed'),
-                               event_name=session.get('event_name'),
-                               project_code=session.get('project_code'),
-                               send_time=f"{session.get('event_date')} {session.get('event_time')} {session.get('timezone')}",
-                               approver_name=session.get('approver_name'),
-                               approver_phone=session.get('approver_phone'))
-
-        elif step == '8':
-            test_status = None
-            if request.method == 'POST' and 'test_number' in request.form:
-                test_number = request.form['test_number']
-                from_numbers = session.get('from_numbers', [])
-                message = session.get('message_body', '')
-                image_url = session.get('image_url')
-                if not from_numbers:
-                    test_status = "No from numbers available."
-                else:
-                    try:
-                        from_number = from_numbers[0]
-                        if image_url:
-                            client.messages.create(
-                                body=message,
-                                from_=from_number,
-                                to=test_number,
-                                media_url=[image_url]
-                            )
-                        else:
-                            client.messages.create(
-                                body=message,
-                                from_=from_number,
-                                to=test_number
-                            )
-                        test_status = "Test message sent. Please review and commit."
-                    except Exception as e:
-                        test_status = f"Error sending message: {e}"
-            return render_template('eventcreate.html', step='8', test_status=test_status)
+            elif step == '8':
+                test_status = None
+                if request.method == 'POST' and 'test_number' in request.form:
+                    test_number = request.form['test_number']
+                    from_numbers = session.get('from_numbers', [])
+                    message = session.get('message_body', '')
+                    image_url = session.get('image_url')
+                    if not from_numbers:
+                        test_status = "No from numbers available."
+                    else:
+                        try:
+                            from_number = from_numbers[0]
+                            if image_url:
+                                client.messages.create(
+                                    body=message,
+                                    from_=from_number,
+                                    to=test_number,
+                                    media_url=[image_url]
+                                )
+                            else:
+                                client.messages.create(
+                                    body=message,
+                                    from_=from_number,
+                                    to=test_number
+                                )
+                            test_status = "Test message sent. Please review and commit."
+                        except Exception as e:
+                            test_status = f"Error sending message: {e}"
+                return render_template('eventcreate.html', step='8', test_status=test_status)
 
         return redirect(url_for('eventcreate'))
 
