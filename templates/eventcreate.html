@@ -28,46 +28,63 @@
     </div>
 
     <!-- STEP 2 -->
-    <div class="step" id="step2">
-        <h2>Step 2: Upload and Map Universe</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step=3) }}" enctype="multipart/form-data">
-            <label>Upload Recipient CSV:</label><br>
-            <input type="file" name="recipient_file" required><br><br>
+    <!-- STEP 2a: Upload Recipient File -->
+<div class="step" id="step2">
+    {% if step == '2' %}
+    <h2>Step 2: Upload Universe File</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=2) }}" enctype="multipart/form-data">
+        <label>Upload Recipient CSV:</label><br>
+        <input type="file" name="recipient_file" required><br><br>
 
-            <label>Map Phone Column:</label>
-            <select name="phone_column" required>
-                {% for col in phone_columns %}
-                <option value="{{ col }}">{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
+        <div class="nav-buttons">
+            <a href="{{ url_for('eventcreate') }}?step=1">Back</a>
+            <button type="submit">Next</button>
+        </div>
+    </form>
+    {% endif %}
+</div>
 
-            <label>Map URL Column:</label>
-            <select name="url_column" required>
-                {% for col in url_columns %}
-                <option value="{{ col }}">{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
+<!-- STEP 2b: Map Columns -->
+<div class="step" id="step2b">
+    {% if step == '2b' %}
+    <h2>Step 2b: Map Columns</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=2b) }}">
+        <label>Map Phone Column:</label>
+        <select name="phone_column" required>
+            {% for col in phone_columns %}
+            <option value="{{ col }}">{{ col }}</option>
+            {% endfor %}
+        </select><br><br>
 
-            <label>First Name Column (optional):</label>
-            <select name="first_name_column">
-                {% for col in first_columns %}
-                <option value="{{ col }}">{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
+        <label>Map URL Column:</label>
+        <select name="url_column" required>
+            {% for col in url_columns %}
+            <option value="{{ col }}">{{ col }}</option>
+            {% endfor %}
+        </select><br><br>
 
-            <label>Last Name Column (optional):</label>
-            <select name="last_name_column">
-                {% for col in last_columns %}
-                <option value="{{ col }}">{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
+        <label>First Name Column (optional):</label>
+        <select name="first_name_column">
+            {% for col in first_columns %}
+            <option value="{{ col }}">{{ col }}</option>
+            {% endfor %}
+        </select><br><br>
 
-            <div class="nav-buttons">
-                <a href="{{ url_for('eventcreate') }}?step=1">Back</a>
-                <button type="submit">Next</button>
-            </div>
-        </form>
-    </div>
+        <label>Last Name Column (optional):</label>
+        <select name="last_name_column">
+            {% for col in last_columns %}
+            <option value="{{ col }}">{{ col }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <div class="nav-buttons">
+            <a href="{{ url_for('eventcreate') }}?step=2">Back</a>
+            <button type="submit">Next</button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
 
     <!-- STEP 3 -->
     <div class="step" id="step3">
