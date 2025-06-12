@@ -36,7 +36,6 @@ def eventcreate():
     step = request.args.get('step', '1')
 
     try:
-        # STEP 1
         if step == '1':
             if request.method == 'POST':
                 session['event_name'] = request.form['event_name']
@@ -44,12 +43,11 @@ def eventcreate():
                 return redirect(url_for('eventcreate', step='2'))
             return render_template('eventcreate.html', step='1')
 
-        # STEP 2
         elif step == '2':
             if request.method == 'POST':
                 file = request.files.get('recipient_file')
-                if not file:
-                    raise ValueError("No file uploaded in Step 2.")
+                if not file or file.filename == '':
+                    return render_template('eventcreate.html', step='2', error="Please upload a valid file.")
                 filename = secure_filename(file.filename)
                 path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(path)
@@ -59,7 +57,6 @@ def eventcreate():
                 return redirect(url_for('eventcreate', step='2b'))
             return render_template('eventcreate.html', step='2')
 
-        # STEP 2b
         elif step == '2b':
             if request.method == 'POST':
                 session['phone_column'] = request.form['phone_column']
@@ -86,7 +83,6 @@ def eventcreate():
                                    phone_columns=columns, url_columns=columns,
                                    first_columns=columns, last_columns=columns)
 
-        # STEP 3
         elif step == '3':
             if request.method == 'POST':
                 session['event_date'] = request.form['event_date']
@@ -95,47 +91,42 @@ def eventcreate():
                 return redirect(url_for('eventcreate', step='4'))
             return render_template('eventcreate.html', step='3')
 
-        # STEP 4
         elif step == '4':
             if request.method == 'POST':
-                if 'message_body' not in request.form:
-                    return render_template('eventcreate.html', step='4')
-                session['message_body'] = request.form['message_body']
-                session['image_url'] = request.form.get('image_url')
+                session['message_body'] = request.form.get('message_body', '').strip()
+                session['image_url'] = request.form.get('image_url', '').strip()
+                if not session['message_body']:
+                    return render_template('eventcreate.html', step='4', error="Message body is required.")
                 return redirect(url_for('eventcreate', step='5'))
             return render_template('eventcreate.html', step='4')
 
-        # STEP 5
         elif step == '5':
             if request.method == 'POST':
                 from_file = request.files.get('from_file')
-                if not from_file:
-                    raise ValueError("No from_file uploaded in Step 5.")
+                if not from_file or from_file.filename == '':
+                    return render_template('eventcreate.html', step='5', error="Please upload a from-numbers file.")
                 from_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(from_file.filename))
                 from_file.save(from_path)
                 session['from_numbers_file'] = from_path
 
                 df = pd.read_csv(from_path, dtype=str)
                 if 'from_number' not in df.columns:
-                    raise ValueError("Missing 'from_number' column in uploaded file.")
-
+                    return render_template('eventcreate.html', step='5', error="Missing 'from_number' column in the file.")
                 session['from_numbers'] = df['from_number'].dropna().tolist()
                 return redirect(url_for('eventcreate', step='6'))
             return render_template('eventcreate.html', step='5')
 
-        # STEP 6
         elif step == '6':
             if request.method == 'POST':
                 approver_name = request.form.get('approver_name', '').strip()
                 approver_phone = request.form.get('approver_phone', '').strip()
                 if not approver_name or not approver_phone:
-                    raise ValueError("Missing approver name or phone.")
+                    return render_template('eventcreate.html', step='6', error="Approver name and phone are required.")
                 session['approver_name'] = approver_name
                 session['approver_phone'] = approver_phone
                 return redirect(url_for('eventcreate', step='7'))
             return render_template('eventcreate.html', step='6')
 
-        # STEP 7
         elif step == '7':
             if request.method == 'POST':
                 session['event_saved'] = True
@@ -150,7 +141,6 @@ def eventcreate():
                                    approver_name=session.get('approver_name'),
                                    approver_phone=session.get('approver_phone'))
 
-        # STEP 8
         elif step == '8':
             test_status = None
             if request.method == 'POST' and 'test_number' in request.form:
@@ -158,7 +148,6 @@ def eventcreate():
                 from_numbers = session.get('from_numbers', [])
                 message = session.get('message_body', '')
                 image_url = session.get('image_url')
-
                 if not from_numbers:
                     test_status = "No from numbers available."
                 else:
@@ -180,14 +169,13 @@ def eventcreate():
                         test_status = "Test message sent. Please review and commit."
                     except Exception as e:
                         test_status = f"Error sending message: {e}"
-
             return render_template('eventcreate.html', step='8', test_status=test_status)
 
         return redirect(url_for('eventcreate'))
 
     except Exception as e:
         print(f"[Error in step {step}] {e}")
-        return f"An error occurred in Step {step}. Please check your input and try again.\nError: {str(e)}", 400
+        return f"An error occurred in Step {step}. Please check your input and try again.<br>Error: {str(e)}", 400
 
 @app.route('/eventcreate/save', methods=['POST'])
 def eventcreate_save():
