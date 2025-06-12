@@ -99,10 +99,16 @@ def eventcreate():
     # STEP 4
     elif step == '4':
         if request.method == 'POST':
+            if 'message_body' not in request.form:
+                # This is not a real form submission; just render the form
+                return render_template('eventcreate.html', step='4')
+            
             session['message_body'] = request.form['message_body']
             session['image_url'] = request.form.get('image_url')
             return redirect(url_for('eventcreate', step='5'))
+    
         return render_template('eventcreate.html', step='4')
+
 
 
     # STEP 5
