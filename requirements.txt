@@ -2,3 +2,4 @@ flask
 pandas
 Flask-Session
 twilio
+python-dotenv
