@@ -1,5 +1,5 @@
 flask
 pandas
-Flask-Session
+flask-session
 twilio
 python-dotenv
