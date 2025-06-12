@@ -31,6 +31,9 @@ def normalize_us_number(raw):
 
 @app.route('/eventcreate', methods=["GET", "POST"])
 def eventcreate():
+    if session.get('event_committed') and request.method == 'POST':
+        return "This event is locked. No changes allowed.", 403
+
     step = request.args.get('step', '1')
 
     # STEP 1
@@ -154,7 +157,7 @@ def eventcreate():
             image_url = session.get('image_url')
     
             if not from_numbers:
-                test_status = "❌ No from numbers available."
+                test_status = "No from numbers available."
             else:
                 try:
                     from_number = from_numbers[0]
@@ -171,19 +174,25 @@ def eventcreate():
                             from_=from_number,
                             to=test_number
                         )
-                    test_status = "✅ Test message sent. Please review and commit."
+                    test_status = "Test message sent. Please review and commit."
                 except Exception as e:
-                    test_status = f"❌ Error sending message: {e}"
+                    test_status = f"Error sending message: {e}"
     
         return render_template('eventcreate.html', step='8', test_status=test_status)
 
 
     return redirect(url_for('eventcreate'))
 
+@app.route('/eventcreate/save', methods=['POST'])
+def eventcreate_save():
+    session['event_saved'] = True
+    return redirect(url_for('eventcreate', step='8'))
+    
 @app.route('/eventcreate/commit', methods=['POST'])
 def eventcreate_commit():
     session['event_committed'] = True
-    return "✅ Campaign committed and locked. Supervisors can now send messages manually."
+    return "Campaign committed and locked. Supervisors can now send messages manually."
+
 
 
 if __name__ == '__main__':
