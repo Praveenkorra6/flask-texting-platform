@@ -212,6 +212,11 @@ def eventcreate_commit():
     session['event_committed'] = True
     return "Campaign committed and locked. Supervisors can now send messages manually."
 
+@app.errorhandler(400)
+def handle_bad_request(e):
+    return render_template('400.html'), 400
+
+
 
 
 if __name__ == '__main__':
