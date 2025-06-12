@@ -131,10 +131,23 @@ def eventcreate():
     # STEP 6
     elif step == '6':
         if request.method == 'POST':
-            session['approver_name'] = request.form['approver_name']
-            session['approver_phone'] = request.form['approver_phone']
-            return redirect(url_for('eventcreate', step='7'))
+            try:
+                approver_name = request.form.get('approver_name', '').strip()
+                approver_phone = request.form.get('approver_phone', '').strip()
+    
+                if not approver_name or not approver_phone:
+                    raise ValueError("Missing approver name or phone.")
+    
+                session['approver_name'] = approver_name
+                session['approver_phone'] = approver_phone
+                return redirect(url_for('eventcreate', step='7'))
+    
+            except Exception as e:
+                print(f"[Step 6 Error] {e}")
+                return "Bad form submission in Step 6. Please ensure all fields are filled.", 400
+    
         return render_template('eventcreate.html', step='6')
+
 
 
     # STEP 7
