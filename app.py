@@ -131,10 +131,10 @@ def eventcreate():
             if request.method == 'POST':
                 session['event_saved'] = True
                 return redirect(url_for('eventcreate', step='8'))
-        
+
             if not session.get('approver_name') or not session.get('approver_phone'):
                 return redirect(url_for('eventcreate', step='6'))
-        
+
             return render_template('eventcreate.html', step='7',
                                    total=session.get('total'),
                                    valid=session.get('valid'),
@@ -144,7 +144,7 @@ def eventcreate():
                                    send_time=f"{session.get('event_date')} {session.get('event_time')} {session.get('timezone')}",
                                    approver_name=session.get('approver_name'),
                                    approver_phone=session.get('approver_phone'))
-    
+
         elif step == '8':
             test_status = None
             if request.method == 'POST' and 'test_number' in request.form:
@@ -169,7 +169,7 @@ def eventcreate():
                                 body=message,
                                 from_=from_number,
                                 to=test_number
-                              )
+                            )
                         test_status = "Test message sent. Please review and commit."
                     except Exception as e:
                         test_status = f"Error sending message: {e}"
