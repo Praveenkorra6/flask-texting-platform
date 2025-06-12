@@ -38,45 +38,45 @@ def eventcreate():
 
     # STEP 2
     # STEP 2a: Upload CSV
-elif step == '2':
-    if request.method == 'POST':
-        file = request.files.get('recipient_file')
-        if file:
-            filename = secure_filename(file.filename)
-            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(path)
-            session['recipient_file'] = path
-            df = pd.read_csv(path, dtype=str)
-            session['csv_columns'] = df.columns.tolist()
-            return redirect(url_for('eventcreate', step='2b'))
-    return render_template('eventcreate.html', step='2')
+    elif step == '2':
+        if request.method == 'POST':
+            file = request.files.get('recipient_file')
+            if file:
+                filename = secure_filename(file.filename)
+                path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(path)
+                session['recipient_file'] = path
+                df = pd.read_csv(path, dtype=str)
+                session['csv_columns'] = df.columns.tolist()
+                return redirect(url_for('eventcreate', step='2b'))
+        return render_template('eventcreate.html', step='2')
 
-# STEP 2b: Map Columns
-elif step == '2b':
-    if request.method == 'POST':
-        session['phone_column'] = request.form['phone_column']
-        session['url_column'] = request.form['url_column']
-        session['first_name_column'] = request.form.get('first_name_column')
-        session['last_name_column'] = request.form.get('last_name_column')
+    # STEP 2b: Map Columns
+    elif step == '2b':
+        if request.method == 'POST':
+            session['phone_column'] = request.form['phone_column']
+            session['url_column'] = request.form['url_column']
+            session['first_name_column'] = request.form.get('first_name_column')
+            session['last_name_column'] = request.form.get('last_name_column')
 
-        df = pd.read_csv(session['recipient_file'], dtype=str)
-        df['clean_phone'] = df[session['phone_column']].apply(normalize_us_number)
-        df = df[df['clean_phone'].notnull() & df[session['url_column']].notnull() & (df[session['url_column']].str.strip() != '')]
+            df = pd.read_csv(session['recipient_file'], dtype=str)
+            df['clean_phone'] = df[session['phone_column']].apply(normalize_us_number)
+            df = df[df['clean_phone'].notnull() & df[session['url_column']].notnull() & (df[session['url_column']].str.strip() != '')]
 
-        session['total'] = len(pd.read_csv(session['recipient_file']))
-        session['valid'] = len(df)
-        session['removed'] = session['total'] - session['valid']
+            session['total'] = len(pd.read_csv(session['recipient_file']))
+            session['valid'] = len(df)
+            session['removed'] = session['total'] - session['valid']
 
-        validated_path = os.path.join(app.config['UPLOAD_FOLDER'], 'validated.csv')
-        df.to_csv(validated_path, index=False)
-        session['validated_file'] = validated_path
+            validated_path = os.path.join(app.config['UPLOAD_FOLDER'], 'validated.csv')
+            df.to_csv(validated_path, index=False)
+            session['validated_file'] = validated_path
 
-        return redirect(url_for('eventcreate', step='3'))
+            return redirect(url_for('eventcreate', step='3'))
 
-    columns = session.get('csv_columns', [])
-    return render_template('eventcreate.html', step='2b',
-                           phone_columns=columns, url_columns=columns,
-                           first_columns=columns, last_columns=columns)
+        columns = session.get('csv_columns', [])
+        return render_template('eventcreate.html', step='2b',
+                               phone_columns=columns, url_columns=columns,
+                               first_columns=columns, last_columns=columns)
 
 
     # STEP 3
