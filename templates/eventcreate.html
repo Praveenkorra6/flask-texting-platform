@@ -11,7 +11,6 @@
         <p>You may view the summary below but cannot make changes.</p>
     {% endif %}
 
-
     <h1>Create Event</h1>
 
     <div class="step-indicator">
@@ -33,7 +32,6 @@
         </form>
         {% endif %}
     </div>
-
 
     <!-- STEP 2 -->
     <div class="step" id="step2">
@@ -188,7 +186,6 @@
             <button type="submit">Save Event</button>
         </form>
 
-
         <div class="nav-buttons">
             <a href="{{ url_for('eventcreate') }}?step=6">Back</a>
             <a href="{{ url_for('eventcreate') }}?step=8">Next</a>
@@ -201,7 +198,7 @@
         {% if step == '8' %}
         <h2>Step 8: Test Message & Approve</h2>
         {% if test_status %}<p>{{ test_status }}</p>{% endif %}
-        <form method="POST">
+        <form method="POST" action="{{ url_for('eventcreate', step=8) }}">
             <label>Send test to:</label>
             <input name="test_number" placeholder="+1XXXXXXXXXX" required>
             <button type="submit">Send Test Message</button>
@@ -218,7 +215,9 @@
 
     <script>
         const step = new URLSearchParams(window.location.search).get('step') || '1';
-        document.getElementById('step' + step.replace(/[^a-zA-Z0-9]/g, '')).classList.add('active');
+        const activeStep = step.replace(/[^a-zA-Z0-9]/g, '');
+        const el = document.getElementById('step' + activeStep);
+        if (el) el.classList.add('active');
     </script>
 </body>
 </html>
