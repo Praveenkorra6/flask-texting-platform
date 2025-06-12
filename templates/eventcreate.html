@@ -178,7 +178,8 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const step = urlParams.get('step') || '1';
-        document.getElementById('step' + step).classList.add('active');
+        const step = new URLSearchParams(window.location.search).get('step') || '1';
+        document.getElementById('step' + step.replace(/[^a-zA-Z0-9]/g, '')).classList.add('active');
     </script>
 </body>
 </html>
