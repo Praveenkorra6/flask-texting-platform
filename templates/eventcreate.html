@@ -122,9 +122,10 @@
     <div class="step" id="step4">
         {% if step == '4' %}
         <h2>Step 4: Message Content</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step=5) }}">
+        <form method="POST" action="{{ url_for('eventcreate', step=4) }}">
             <label>Message Template:</label><br>
             <textarea name="message_body" rows="5" cols="60" required>{{ session.get('message_body', '') }}</textarea><br><br>
+
     
             <label>Image Link (optional):</label>
             <input type="text" name="image_url" value="{{ session.get('image_url', '') }}"><br><br>
