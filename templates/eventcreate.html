@@ -125,10 +125,10 @@
         <form method="POST" action="{{ url_for('eventcreate', step=5) }}">
             <label>Message Template:</label><br>
             <textarea name="message_body" rows="5" cols="60" required>{{ session.get('message_body', '') }}</textarea><br><br>
-
+    
             <label>Image Link (optional):</label>
             <input type="text" name="image_url" value="{{ session.get('image_url', '') }}"><br><br>
-
+    
             <div class="nav-buttons">
                 <a href="{{ url_for('eventcreate') }}?step=3">Back</a>
                 <button type="submit">Next</button>
@@ -136,6 +136,7 @@
         </form>
         {% endif %}
     </div>
+
 
     <!-- STEP 5 -->
     <div class="step" id="step5">
