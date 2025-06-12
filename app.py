@@ -128,13 +128,9 @@ def eventcreate():
             return render_template('eventcreate.html', step='6')
 
         elif step == '7':
-            if not session.get('approver_name') or not session.get('approver_phone'):
-                return redirect(url_for('eventcreate', step='6'))
-
             if request.method == 'POST':
                 session['event_saved'] = True
-                return redirect(url_for('eventcreate', step='8'))
-
+                return redirect(url_for('eventcreate', step='7'))  # Stay on 7 after saving
             return render_template('eventcreate.html', step='7',
                                    total=session.get('total'),
                                    valid=session.get('valid'),
@@ -144,6 +140,7 @@ def eventcreate():
                                    send_time=f"{session.get('event_date')} {session.get('event_time')} {session.get('timezone')}",
                                    approver_name=session.get('approver_name'),
                                    approver_phone=session.get('approver_phone'))
+
 
         elif step == '8':
             test_status = None
