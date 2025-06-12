@@ -18,9 +18,9 @@
         <h2>Step 1: Event Information</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=2) }}">
             <label>Event Name:</label><br>
-            <input type="text" name="event_name" required><br><br>
+            <input type="text" name="event_name" value="{{ session.get('event_name', '') }}" required><br><br>
             <label>Project Code:</label><br>
-            <input type="text" name="project_code" required><br><br>
+            <input type="text" name="project_code" value="{{ session.get('project_code', '') }}" required><br><br>
             <div class="nav-buttons">
                 <button type="submit">Next</button>
             </div>
@@ -48,7 +48,7 @@
 <div class="step" id="step2b">
     {% if step == '2b' %}
     <h2>Step 2b: Map Columns</h2>
-    <form method="POST" action="{{ url_for('eventcreate', step=2b) }}">
+    <form method="POST" action="{{ url_for('eventcreate', step='2b') }}">
         <label>Map Phone Column:</label>
         <select name="phone_column" required>
             {% for col in phone_columns %}
@@ -91,17 +91,18 @@
         <h2>Step 3: Set Schedule</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=4) }}">
             <label>Event Date:</label>
-            <input type="date" name="event_date" required><br><br>
+            <input type="date" name="event_date" value="{{ session.get('event_date', '') }}" required><br><br>
 
             <label>Event Time:</label>
-            <input type="time" name="event_time" required><br><br>
+            <input type="time" name="event_time" value="{{ session.get('event_time', '') }}" required><br><br>
 
             <label>Timezone:</label>
             <select name="timezone" required>
-                <option value="EST">EST</option>
-                <option value="CST">CST</option>
-                <option value="MST">MST</option>
-                <option value="PST">PST</option>
+                {% set tz = session.get('timezone', '') %}
+                <option value="EST" {% if tz == 'EST' %}selected{% endif %}>EST</option>
+                <option value="CST" {% if tz == 'CST' %}selected{% endif %}>CST</option>
+                <option value="MST" {% if tz == 'MST' %}selected{% endif %}>MST</option>
+                <option value="PST" {% if tz == 'PST' %}selected{% endif %}>PST</option>
             </select><br><br>
 
             <div class="nav-buttons">
@@ -116,10 +117,10 @@
         <h2>Step 4: Message Content</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=5) }}">
             <label>Message Template:</label><br>
-            <textarea name="message_body" rows="5" cols="60" required></textarea><br><br>
+            <textarea name="message_body" rows="5" cols="60" required>{{ session.get('message_body', '') }}</textarea><br><br>
 
             <label>Image Link (optional):</label>
-            <input type="text" name="image_url"><br><br>
+            <input type="text" name="image_url" value="{{ session.get('image_url', '') }}"><br><br>
 
             <div class="nav-buttons">
                 <a href="{{ url_for('eventcreate') }}?step=3">Back</a>
@@ -147,9 +148,9 @@
         <h2>Step 6: Approvers</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=7) }}">
             <label>Approver Name:</label><br>
-            <input type="text" name="approver_name" required><br><br>
+            <input type="text" name="approver_name" value="{{ session.get('approver_name', '') }}" required><br><br>
             <label>Approver Phone Number:</label><br>
-            <input type="text" name="approver_phone" required><br><br>
+            <input type="text" name="approver_phone" value="{{ session.get('approver_phone', '') }}" required><br><br>
 
             <div class="nav-buttons">
                 <a href="{{ url_for('eventcreate') }}?step=5">Back</a>
