@@ -161,9 +161,9 @@
         <h2>Step 6: Approvers</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=7) }}">
             <label>Approver Name:</label><br>
-            <input type="text" name="approver_name" value="{{ session.get('approver_name', '') }}" required><br><br>
+            <input type="text" name="approver_name" value="{{ session.get('approver_name', '') }}" maxlength="50" required><br><br>
             <label>Approver Phone Number:</label><br>
-            <input type="text" name="approver_phone" value="{{ session.get('approver_phone', '') }}" required><br><br>
+            <input type="text" name="approver_phone" value="{{ session.get('approver_phone', '') }}" maxlength="20"required><br><br>
 
             <div class="nav-buttons">
                 <a href="{{ url_for('eventcreate') }}?step=5">Back</a>
