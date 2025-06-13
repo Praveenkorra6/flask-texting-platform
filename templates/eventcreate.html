@@ -66,30 +66,33 @@
             <label>Map Phone Column:</label>
             <select name="phone_column" required>
                 {% for col in phone_columns %}
-                <option value="{{ col }}">{{ col }}</option>
+                <option value="{{ col }}" {% if col == session.get('phone_column') %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select><br><br>
-
+            
             <label>Map URL Column:</label>
             <select name="url_column" required>
                 {% for col in url_columns %}
-                <option value="{{ col }}">{{ col }}</option>
+                <option value="{{ col }}" {% if col == session.get('url_column') %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select><br><br>
-
+            
             <label>First Name Column (optional):</label>
             <select name="first_name_column">
+                <option value="">-- None --</option>
                 {% for col in first_columns %}
-                <option value="{{ col }}">{{ col }}</option>
+                <option value="{{ col }}" {% if col == session.get('first_name_column') %}selected{% endif %}>{{ col }}</option>
+                {% endfor %}
+            </select><br><br>
+            
+            <label>Last Name Column (optional):</label>
+            <select name="last_name_column">
+                <option value="">-- None --</option>
+                {% for col in last_columns %}
+                <option value="{{ col }}" {% if col == session.get('last_name_column') %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select><br><br>
 
-            <label>Last Name Column (optional):</label>
-            <select name="last_name_column">
-                {% for col in last_columns %}
-                <option value="{{ col }}">{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
 
             <div class="nav-buttons">
                 <a href="{{ url_for('eventcreate') }}?step=2">Back</a>
@@ -103,8 +106,8 @@
             <p><strong>Total Records:</strong> {{ total }}</p>
             <p><strong>Valid Records:</strong> {{ valid }}</p>
             <p><strong>Rejected Records:</strong> {{ removed }}</p>
-            <form method="POST" action="{{ url_for('eventcreate', step=3) }}">
-                <input type="hidden" name="proceed_after_summary" value="true">
+            <form method="GET" action="{{ url_for('eventcreate') }}">
+                <input type="hidden" name="step" value="3">
                 <button type="submit">Proceed to Step 3</button>
             </form>
         </div>
