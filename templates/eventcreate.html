@@ -103,8 +103,8 @@
             <p><strong>Total Records:</strong> {{ total }}</p>
             <p><strong>Valid Records:</strong> {{ valid }}</p>
             <p><strong>Rejected Records:</strong> {{ removed }}</p>
-        
             <form method="POST" action="{{ url_for('eventcreate', step=3) }}">
+                <input type="hidden" name="proceed_after_summary" value="true">
                 <button type="submit">Proceed to Step 3</button>
             </form>
         </div>
