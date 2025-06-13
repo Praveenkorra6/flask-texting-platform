@@ -66,14 +66,14 @@
             <label>Map Phone Column:</label>
             <select name="phone_column" required>
                 {% for col in phone_columns %}
-                <option value="{{ col }}" {% if col == session.get('phone_column') %}selected{% endif %}>{{ col }}</option>
+                <option value="{{ col }}" {% if col == selected_phone %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select><br><br>
             
             <label>Map URL Column:</label>
             <select name="url_column" required>
                 {% for col in url_columns %}
-                <option value="{{ col }}" {% if col == session.get('url_column') %}selected{% endif %}>{{ col }}</option>
+                <option value="{{ col }}" {% if col == selected_url %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select><br><br>
             
@@ -81,7 +81,7 @@
             <select name="first_name_column">
                 <option value="">-- None --</option>
                 {% for col in first_columns %}
-                <option value="{{ col }}" {% if col == session.get('first_name_column') %}selected{% endif %}>{{ col }}</option>
+                <option value="{{ col }}" {% if col == selected_first %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select><br><br>
             
@@ -89,9 +89,10 @@
             <select name="last_name_column">
                 <option value="">-- None --</option>
                 {% for col in last_columns %}
-                <option value="{{ col }}" {% if col == session.get('last_name_column') %}selected{% endif %}>{{ col }}</option>
+                <option value="{{ col }}" {% if col == selected_last %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
             </select><br><br>
+
 
 
             <div class="nav-buttons">
