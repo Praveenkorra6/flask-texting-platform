@@ -104,7 +104,7 @@
             <p><strong>Valid Records:</strong> {{ valid }}</p>
             <p><strong>Rejected Records:</strong> {{ removed }}</p>
         
-            <form method="GET" action="{{ url_for('eventcreate', step=3) }}">
+            <form method="POST" action="{{ url_for('eventcreate', step=3) }}">
                 <button type="submit">Proceed to Step 3</button>
             </form>
         </div>
