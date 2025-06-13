@@ -124,6 +124,8 @@ def eventcreate():
                 session['event_saved'] = False
                 return redirect(url_for('eventcreate', step='4'))
 
+            return render_template('eventcreate.html', step='3')
+
 
         elif step == '4':
             if request.method == 'POST':
