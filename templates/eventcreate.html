@@ -93,25 +93,27 @@
                 {% endfor %}
             </select><br><br>
 
-
-
             <div class="nav-buttons">
                 <a href="{{ url_for('eventcreate') }}?step=2">Back</a>
                 <button type="submit">Next</button>
             </div>
         </form>
-        {% endif %}
         {% if total is not none %}
         <div class="summary">
             <h3>File Summary</h3>
             <p><strong>Total Records:</strong> {{ total }}</p>
             <p><strong>Valid Records:</strong> {{ valid }}</p>
             <p><strong>Rejected Records:</strong> {{ removed }}</p>
-            <form method="GET" action="{{ url_for('eventcreate') }}">
-                <input type="hidden" name="step" value="3">
+            <form method="POST" action="{{ url_for('eventcreate', step='2b') }}">
+                <input type="hidden" name="proceed" value="yes">
+                <input type="hidden" name="phone_column" value="{{ selected_phone }}">
+                <input type="hidden" name="url_column" value="{{ selected_url }}">
+                <input type="hidden" name="first_name_column" value="{{ selected_first }}">
+                <input type="hidden" name="last_name_column" value="{{ selected_last }}">
                 <button type="submit">Proceed to Step 3</button>
             </form>
         </div>
+        {% endif %}
         {% endif %}
     </div>
 
