@@ -44,7 +44,13 @@ def eventcreate():
                 session['project_code'] = request.form['project_code']
                 session['event_saved'] = False
                 return redirect(url_for('eventcreate', step='2'))
-            return render_template('eventcreate.html', step='1')
+            return render_template(
+            'eventcreate.html',
+            step='1',
+            event_name=session.get('event_name', ''),
+            project_code=session.get('project_code', '')
+        )
+
 
         elif step == '2':
             if request.method == 'POST':
@@ -62,15 +68,21 @@ def eventcreate():
 
         elif step == '2b':
             columns = session.get('csv_columns', [])
+            total = session.get('total', 0)
+            valid = session.get('valid', 0)
+            removed = session.get('removed', 0)
+        
+            phone_columns = columns
+            url_columns = columns
+            first_columns = columns
+            last_columns = columns
         
             if request.method == 'POST':
-                # 1) Save mapping selection
                 session['phone_column']      = request.form['phone_column']
                 session['url_column']        = request.form['url_column']
                 session['first_name_column'] = request.form.get('first_name_column')
                 session['last_name_column']  = request.form.get('last_name_column')
         
-                # 2) Load & clean
                 df = pd.read_csv(session['recipient_file'], dtype=str)
                 df['clean_phone'] = df[session['phone_column']].apply(normalize_us_number)
                 df = df[
@@ -79,29 +91,33 @@ def eventcreate():
                     (df[session['url_column']].str.strip() != '')
                 ]
         
-                # 3) Store counts
                 session['total']   = len(pd.read_csv(session['recipient_file']))
                 session['valid']   = len(df)
                 session['removed'] = session['total'] - session['valid']
         
-                # 4) Save validated file
                 validated_path = os.path.join(app.config['UPLOAD_FOLDER'], 'validated.csv')
                 df.to_csv(validated_path, index=False)
                 session['validated_file'] = validated_path
         
-                # 5) Redirect back to 2b so user can see the summary
                 return redirect(url_for('eventcreate', step='2b'))
         
-            # GET: show mapping form *and* any counts from a previous POST
             return render_template(
                 'eventcreate.html',
                 step='2b',
-                phone_columns=columns, url_columns=columns,
-                first_columns=columns, last_columns=columns,
-                total=session.get('total'),
-                valid=session.get('valid'),
-                removed=session.get('removed')
+                phone_columns=phone_columns,
+                url_columns=url_columns,
+                first_columns=first_columns,
+                last_columns=last_columns,
+                selected_phone=session.get('phone_column', ''),
+                selected_url=session.get('url_column', ''),
+                selected_first=session.get('first_name_column', ''),
+                selected_last=session.get('last_name_column', ''),
+                total=total,
+                valid=valid,
+                removed=removed
             )
+
+
 
 
         elif step == '3':
@@ -124,7 +140,14 @@ def eventcreate():
                 session['event_saved'] = False
                 return redirect(url_for('eventcreate', step='4'))
 
-            return render_template('eventcreate.html', step='3')
+            return render_template(
+                'eventcreate.html',
+                step='3',
+                event_date=session.get('event_date', ''),
+                event_time=session.get('event_time', ''),
+                timezone=session.get('timezone', '')
+            )
+
 
 
         elif step == '4':
@@ -134,7 +157,13 @@ def eventcreate():
                 if not session['message_body']:
                     return render_template('eventcreate.html', step='4', error="Message body is required.")
                 return redirect(url_for('eventcreate', step='5'))
-            return render_template('eventcreate.html', step='4')
+            return render_template(
+                'eventcreate.html',
+                step='4',
+                message_body=session.get('message_body', ''),
+                image_url=session.get('image_url', '')
+            )
+
 
         elif step == '5':
             if request.method == 'POST':
@@ -177,7 +206,13 @@ def eventcreate():
                 session['approver_phone'] = normalized
                 session['event_saved'] = False
                 return redirect(url_for('eventcreate', step='7'))
-            return render_template('eventcreate.html', step='6')
+            return render_template(
+                'eventcreate.html',
+                step='6',
+                approver_name=session.get('approver_name', ''),
+                approver_phone=session.get('approver_phone', '')
+            )
+
 
         elif step == '7':
             if request.method == 'POST':
@@ -188,10 +223,10 @@ def eventcreate():
             valid = session.get('valid', 0)
             removed = session.get('removed', 0)
             send_time = f"{session.get('event_date', 'N/A')} {session.get('event_time', '')} {session.get('timezone', '')}"
-            event_name = session.get('event_name', 'N/A')
-            project_code = session.get('project_code', 'N/A')
-            approver_name = session.get('approver_name', 'N/A')
-            approver_phone = session.get('approver_phone', 'N/A')
+            event_name = session.get('event_name') or 'N/A'
+            project_code = session.get('project_code') or 'N/A'
+            approver_name = session.get('approver_name') or 'N/A'
+            approver_phone = session.get('approver_phone') or 'N/A'
             return render_template('eventcreate.html', step='7',
                                    total=total,
                                    valid=valid,
