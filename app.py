@@ -5,6 +5,7 @@ import os
 import re
 from werkzeug.utils import secure_filename
 from twilio.rest import Client
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
@@ -21,15 +22,16 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 def normalize_us_number(raw):
     if pd.isna(raw):
         return None
-    num = re.sub(r'\D', '', str(raw))
+    num = re.sub(r'\D', '', str(raw))  # Remove all non-digits
     if len(num) == 10:
         return '+1' + num
-    elif len(num) == 11 and num.startswith('1'):
-        return '+' + num
-    return None
+    return None  # Invalid if not exactly 10 digits
+
 
 @app.route('/eventcreate', methods=["GET", "POST"])
 def eventcreate():
+    if 'event_saved' not in session:
+        session['event_saved'] = False
     if session.get('event_committed') and request.method == 'POST':
         return "This event is locked. No changes allowed.", 403
 
@@ -40,6 +42,7 @@ def eventcreate():
             if request.method == 'POST':
                 session['event_name'] = request.form['event_name']
                 session['project_code'] = request.form['project_code']
+                session['event_saved'] = False
                 return redirect(url_for('eventcreate', step='2'))
             return render_template('eventcreate.html', step='1')
 
@@ -58,38 +61,69 @@ def eventcreate():
             return render_template('eventcreate.html', step='2')
 
         elif step == '2b':
+            columns = session.get('csv_columns', [])
+        
             if request.method == 'POST':
-                session['phone_column'] = request.form['phone_column']
-                session['url_column'] = request.form['url_column']
+                # 1) Save mapping selection
+                session['phone_column']      = request.form['phone_column']
+                session['url_column']        = request.form['url_column']
                 session['first_name_column'] = request.form.get('first_name_column')
-                session['last_name_column'] = request.form.get('last_name_column')
-
+                session['last_name_column']  = request.form.get('last_name_column')
+        
+                # 2) Load & clean
                 df = pd.read_csv(session['recipient_file'], dtype=str)
                 df['clean_phone'] = df[session['phone_column']].apply(normalize_us_number)
-                df = df[df['clean_phone'].notnull() & df[session['url_column']].notnull() & (df[session['url_column']].str.strip() != '')]
-
-                session['total'] = len(pd.read_csv(session['recipient_file']))
-                session['valid'] = len(df)
+                df = df[
+                    df['clean_phone'].notnull() &
+                    df[session['url_column']].notnull() &
+                    (df[session['url_column']].str.strip() != '')
+                ]
+        
+                # 3) Store counts
+                session['total']   = len(pd.read_csv(session['recipient_file']))
+                session['valid']   = len(df)
                 session['removed'] = session['total'] - session['valid']
-
+        
+                # 4) Save validated file
                 validated_path = os.path.join(app.config['UPLOAD_FOLDER'], 'validated.csv')
                 df.to_csv(validated_path, index=False)
                 session['validated_file'] = validated_path
+        
+                # 5) Redirect back to 2b so user can see the summary
+                return redirect(url_for('eventcreate', step='2b'))
+        
+            # GET: show mapping form *and* any counts from a previous POST
+            return render_template(
+                'eventcreate.html',
+                step='2b',
+                phone_columns=columns, url_columns=columns,
+                first_columns=columns, last_columns=columns,
+                total=session.get('total'),
+                valid=session.get('valid'),
+                removed=session.get('removed')
+            )
 
-                return redirect(url_for('eventcreate', step='3'))
-
-            columns = session.get('csv_columns', [])
-            return render_template('eventcreate.html', step='2b',
-                                   phone_columns=columns, url_columns=columns,
-                                   first_columns=columns, last_columns=columns)
 
         elif step == '3':
             if request.method == 'POST':
-                session['event_date'] = request.form['event_date']
-                session['event_time'] = request.form['event_time']
-                session['timezone'] = request.form['timezone']
+                date_str = request.form['event_date']
+                time_str = request.form['event_time']
+                timezone = request.form['timezone']
+            
+                try:
+                    full_dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+                    now = datetime.now()
+                    if full_dt < now + timedelta(minutes=5):
+                        return render_template('eventcreate.html', step='3', error="Scheduled time must be at least 5 minutes from now.")
+                except Exception as e:
+                    return render_template('eventcreate.html', step='3', error="Invalid date or time format.")
+            
+                session['event_date'] = date_str
+                session['event_time'] = time_str
+                session['timezone'] = timezone
+                session['event_saved'] = False
                 return redirect(url_for('eventcreate', step='4'))
-            return render_template('eventcreate.html', step='3')
+
 
         elif step == '4':
             if request.method == 'POST':
@@ -105,25 +139,41 @@ def eventcreate():
                 from_file = request.files.get('from_file')
                 if not from_file or from_file.filename == '':
                     return render_template('eventcreate.html', step='5', error="Please upload a from-numbers file.")
+                
                 from_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(from_file.filename))
                 from_file.save(from_path)
                 session['from_numbers_file'] = from_path
-
+        
                 df = pd.read_csv(from_path, dtype=str)
                 if 'from_number' not in df.columns:
                     return render_template('eventcreate.html', step='5', error="Missing 'from_number' column in the file.")
-                session['from_numbers'] = df['from_number'].dropna().tolist()
+                
+                # Normalize phone numbers and filter out invalid ones
+                raw_numbers = df['from_number'].dropna().tolist()
+                normalized_numbers = [normalize_us_number(num) for num in raw_numbers]
+                valid_numbers = [num for num in normalized_numbers if num]
+        
+                if not valid_numbers:
+                    return render_template('eventcreate.html', step='5', error="No valid 10-digit phone numbers found in 'from_number' column.")
+        
+                session['from_numbers'] = valid_numbers
+                session['event_saved'] = False
                 return redirect(url_for('eventcreate', step='6'))
+        
             return render_template('eventcreate.html', step='5')
 
         elif step == '6':
             if request.method == 'POST':
                 approver_name = request.form.get('approver_name', '').strip()
                 approver_phone = request.form.get('approver_phone', '').strip()
-                if not approver_name or not approver_phone:
-                    return render_template('eventcreate.html', step='6', error="Approver name and phone are required.")
+            
+                normalized = normalize_us_number(approver_phone)
+                if not approver_name or not normalized:
+                    return render_template('eventcreate.html', step='6', error="Approver name and a valid 10-digit phone number are required.")
+            
                 session['approver_name'] = approver_name
-                session['approver_phone'] = approver_phone
+                session['approver_phone'] = normalized
+                session['event_saved'] = False
                 return redirect(url_for('eventcreate', step='7'))
             return render_template('eventcreate.html', step='6')
 
@@ -131,16 +181,24 @@ def eventcreate():
             if request.method == 'POST':
                 session['event_saved'] = True
                 return redirect(url_for('eventcreate', step='7'))  # Stay on 7 after saving
+            # Construct default/fallback values
+            total = session.get('total', 0)
+            valid = session.get('valid', 0)
+            removed = session.get('removed', 0)
+            send_time = f"{session.get('event_date', 'N/A')} {session.get('event_time', '')} {session.get('timezone', '')}"
+            event_name = session.get('event_name', 'N/A')
+            project_code = session.get('project_code', 'N/A')
+            approver_name = session.get('approver_name', 'N/A')
+            approver_phone = session.get('approver_phone', 'N/A')
             return render_template('eventcreate.html', step='7',
-                                   total=session.get('total'),
-                                   valid=session.get('valid'),
-                                   removed=session.get('removed'),
-                                   event_name=session.get('event_name'),
-                                   project_code=session.get('project_code'),
-                                   send_time=f"{session.get('event_date')} {session.get('event_time')} {session.get('timezone')}",
-                                   approver_name=session.get('approver_name'),
-                                   approver_phone=session.get('approver_phone'))
-
+                                   total=total,
+                                   valid=valid,
+                                   removed=removed,
+                                   event_name=event_name,
+                                   project_code=project_code,
+                                   send_time=send_time,
+                                   approver_name=approver_name,
+                                   approver_phone=approver_phone)
 
         elif step == '8':
             test_status = None
