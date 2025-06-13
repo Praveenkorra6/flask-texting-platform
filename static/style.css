@@ -42,6 +42,13 @@ button:hover, .nav-buttons a:hover, input[type="submit"]:hover {
     background-color: #2980b9;
 }
 
+.summary {
+    background-color: #f0f9f0;
+    padding: 15px;
+    border-left: 5px solid #28a745;
+    margin-top: 20px;
+}
+
 .step {
     display: none;
     background: #fff;
@@ -53,6 +60,15 @@ button:hover, .nav-buttons a:hover, input[type="submit"]:hover {
 
 .step.active {
     display: block;
+}
+
+.error {
+    color: #d93025;
+    background: #ffe6e6;
+    border-left: 4px solid #d93025;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
 }
 
 .nav-buttons {
