@@ -20,6 +20,9 @@
     <!-- STEP 1 -->
     <div class="step" id="step1">
         {% if step == '1' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
         <h2>Step 1: Event Information</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=2) }}">
             <label>Event Name:</label><br>
@@ -36,6 +39,9 @@
     <!-- STEP 2 -->
     <div class="step" id="step2">
         {% if step == '2' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}        
         <h2>Step 2: Upload Universe File</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=2) }}" enctype="multipart/form-data">
             <label>Upload Recipient CSV:</label><br>
@@ -49,9 +55,12 @@
         {% endif %}
     </div>
 
-    <!-- STEP 2b: Map Columns -->
+    <!-- STEP 2b -->
     <div class="step" id="step2b">
         {% if step == '2b' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
         <h2>Step 2b: Map Columns</h2>
         <form method="POST" action="{{ url_for('eventcreate', step='2b') }}">
             <label>Map Phone Column:</label>
@@ -105,6 +114,9 @@
     <!-- STEP 3 -->
     <div class="step" id="step3">
         {% if step == '3' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
         <h2>Step 3: Set Schedule</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=4) }}">
             <label>Event Date:</label>
@@ -133,15 +145,17 @@
     <!-- STEP 4 -->
     <div class="step" id="step4">
         {% if step == '4' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
         <h2>Step 4: Message Content</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=4) }}">
             <label>Message Template:</label><br>
             <textarea name="message_body" rows="5" cols="60" required>{{ session.get('message_body', '') }}</textarea><br><br>
 
-    
             <label>Image Link (optional):</label>
             <input type="text" name="image_url" value="{{ session.get('image_url', '') }}"><br><br>
-    
+
             <div class="nav-buttons">
                 <a href="{{ url_for('eventcreate') }}?step=3">Back</a>
                 <button type="submit">Next</button>
@@ -150,10 +164,12 @@
         {% endif %}
     </div>
 
-
     <!-- STEP 5 -->
     <div class="step" id="step5">
         {% if step == '5' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
         <h2>Step 5: Upload Sender Numbers</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=6) }}" enctype="multipart/form-data">
             <label>Upload From-Numbers File (CSV or TXT):</label><br>
@@ -170,12 +186,15 @@
     <!-- STEP 6 -->
     <div class="step" id="step6">
         {% if step == '6' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
         <h2>Step 6: Approvers</h2>
         <form method="POST" action="{{ url_for('eventcreate', step=7) }}">
             <label>Approver Name:</label><br>
             <input type="text" name="approver_name" value="{{ session.get('approver_name', '') }}" maxlength="50" required><br><br>
             <label>Approver Phone Number:</label><br>
-            <input type="text" name="approver_phone" value="{{ session.get('approver_phone', '') }}" maxlength="20"required><br><br>
+            <input type="text" name="approver_phone" value="{{ session.get('approver_phone', '') }}" maxlength="20" required><br><br>
 
             <div class="nav-buttons">
                 <a href="{{ url_for('eventcreate') }}?step=5">Back</a>
@@ -188,6 +207,9 @@
     <!-- STEP 7 -->
     <div class="step" id="step7">
         {% if step == '7' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
         <h2>Step 7: Review and Save</h2>
         <p>Total recipients uploaded: {{ total }}</p>
         <p>Valid phone numbers: {{ valid }}</p>
@@ -202,7 +224,10 @@
 
         <div class="nav-buttons">
             <a href="{{ url_for('eventcreate') }}?step=6">Back</a>
-            <a href="{{ url_for('eventcreate') }}?step=8">Next</a>
+            <form method="GET" action="{{ url_for('eventcreate') }}">
+                <input type="hidden" name="step" value="8">
+                <button type="submit">Next</button>
+            </form>
         </div>
         {% endif %}
     </div>
@@ -210,8 +235,13 @@
     <!-- STEP 8 -->
     <div class="step" id="step8">
         {% if step == '8' %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
         <h2>Step 8: Test Message & Approve</h2>
-        {% if test_status %}<p>{{ test_status }}</p>{% endif %}
+        {% if test_status %}
+            <div class="error">{{ test_status }}</div>
+        {% endif %}
         <form method="POST" action="{{ url_for('eventcreate', step=8) }}">
             <label>Send test to:</label>
             <input name="test_number" placeholder="+1XXXXXXXXXX" required>
