@@ -62,6 +62,23 @@ button:hover, .nav-buttons a:hover, input[type="submit"]:hover {
     display: block;
 }
 
+.step-indicator {
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.step-indicator::after {
+    content: "";
+    display: block;
+    height: 4px;
+    background-color: #3498db;
+    margin-top: 10px;
+    width: 100%;
+    max-width: 100px;
+}
+
+
 .error {
     color: #d93025;
     background: #ffe6e6;
@@ -78,3 +95,13 @@ button:hover, .nav-buttons a:hover, input[type="submit"]:hover {
 label {
     font-weight: 600;
 }
+@media (max-width: 600px) {
+    input, select, textarea, button {
+        font-size: 14px;
+        padding: 8px;
+    }
+    body {
+        margin: 20px;
+    }
+}
+
