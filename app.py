@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import re
 import uuid
+import shutil
 from werkzeug.utils import secure_filename
 from twilio.rest import Client
 from datetime import datetime, timedelta
@@ -245,6 +246,15 @@ def eventcreate_commit():
 @app.errorhandler(400)
 def handle_bad_request(e):
     return render_template('400.html'), 400
+    
+@app.route('/delete_event_data/<event_id>')
+def delete_event_data(event_id):
+    folder_path = os.path.join("event_data", event_id)
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+        return f"Deleted event data folder: {folder_path}"
+    return f"No folder found for event ID: {event_id}"
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
+
