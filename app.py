@@ -99,7 +99,7 @@ def eventcreate():
                 df.to_csv(validated_path, index=False)
                 session['validated_file'] = validated_path
         
-                return redirect(url_for('eventcreate', step='2b'))
+                return redirect(url_for('eventcreate', step='3'))
         
             return render_template(
                 'eventcreate.html',
