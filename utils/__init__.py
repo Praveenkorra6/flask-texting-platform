@@ -15,19 +15,22 @@ def get_event_path(event_id):
 
 
 def load_event(event_id):
-    """
-    Load the event data from the JSON file.
-    Returns an empty dict if the file doesn't exist or is corrupted.
-    """
     path = get_event_path(event_id)
     if os.path.exists(path):
         try:
             with open(path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except json.JSONDecodeError as e:
-            print(f"Warning: Could not decode JSON for event {event_id} - {e}")
+                content = f.read()
+                if content.startswith("b'") or content.startswith('b"'):
+                    print(f"Corrupted content found in {event_id}, deleting.")
+                    os.remove(path)
+                    return {}
+                return json.loads(content)
+        except Exception as e:
+            print(f"[load_event error] {e}")
+            os.remove(path)  # cleanup
             return {}
     return {}
+
 
 
 def save_event(event_id, data):
