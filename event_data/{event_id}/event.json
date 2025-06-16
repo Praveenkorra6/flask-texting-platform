@@ -1,0 +1,18 @@
+import json
+
+def get_event_path(event_id):
+    dir_path = os.path.join("event_data", str(event_id))
+    os.makedirs(dir_path, exist_ok=True)
+    return os.path.join(dir_path, "event.json")
+
+def load_event(event_id):
+    path = get_event_path(event_id)
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_event(event_id, data):
+    path = get_event_path(event_id)
+    with open(path, 'w') as f:
+        json.dump(data, f, indent=2)
