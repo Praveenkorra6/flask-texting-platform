@@ -9,7 +9,6 @@ from twilio.rest import Client
 from datetime import datetime, timedelta
 from utils import load_event, save_event
 
-
 app = Flask(__name__)
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
