@@ -7,7 +7,8 @@ import uuid
 from werkzeug.utils import secure_filename
 from twilio.rest import Client
 from datetime import datetime, timedelta
-from utils.event_json_utils import load_event, save_event
+from utils import load_event, save_event
+
 
 app = Flask(__name__)
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
