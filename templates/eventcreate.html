@@ -6,11 +6,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    {% if session.get('event_committed') %}
-        <h2>This event has already been committed and is now locked.</h2>
-        <p>You may view the summary below but cannot make changes.</p>
-    {% endif %}
-
     <h1>Create Event</h1>
 
     <div class="step-indicator">
@@ -18,256 +13,165 @@
     </div>
 
     <!-- STEP 1 -->
-    <div class="step" id="step1">
-        {% if step == '1' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <h2>Step 1: Event Information</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step=2) }}">
-            <label>Event Name:</label><br>
-            <input type="text" name="event_name" value="{{ session.get('event_name', '') }}" required><br><br>
-            <label>Project Code:</label><br>
-            <input type="text" name="project_code" value="{{ session.get('project_code', '') }}" required><br><br>
-            <div class="nav-buttons">
-                <button type="submit">Next</button>
-            </div>
-        </form>
-        {% endif %}
-    </div>
+    {% if step == '1' %}
+    <h2>Step 1: Event Information</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=2, event_id=event_id) }}">
+        <label>Event Name:</label><br>
+        <input type="text" name="event_name" value="{{ event_name }}" required><br><br>
+        <label>Project Code:</label><br>
+        <input type="text" name="project_code" value="{{ project_code }}" required><br><br>
+        <button type="submit">Next</button>
+    </form>
+    {% endif %}
 
     <!-- STEP 2 -->
-    <div class="step" id="step2">
-        {% if step == '2' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}        
-        <h2>Step 2: Upload Universe File</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step=2) }}" enctype="multipart/form-data">
-            <label>Upload Recipient CSV:</label><br>
-            <input type="file" name="recipient_file" required><br><br>
-
-            <div class="nav-buttons">
-                <a href="{{ url_for('eventcreate') }}?step=1">Back</a>
-                <button type="submit">Next</button>
-            </div>
-        </form>
-        {% endif %}
-    </div>
+    {% if step == '2' %}
+    <h2>Step 2: Upload Universe File</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=2, event_id=event_id) }}" enctype="multipart/form-data">
+        <input type="file" name="recipient_file" required><br><br>
+        <a href="{{ url_for('eventcreate', step=1, event_id=event_id) }}">Back</a>
+        <button type="submit">Next</button>
+    </form>
+    {% endif %}
 
     <!-- STEP 2b -->
-    <div class="step" id="step2b">
-        {% if step == '2b' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <h2>Step 2b: Map Columns</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step='2b') }}">
-            <label>Map Phone Column:</label>
-            <select name="phone_column" required>
-                {% for col in phone_columns %}
-                <option value="{{ col }}" {% if col == selected_phone %}selected{% endif %}>{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
-            
-            <label>Map URL Column:</label>
-            <select name="url_column" required>
-                {% for col in url_columns %}
-                <option value="{{ col }}" {% if col == selected_url %}selected{% endif %}>{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
-            
-            <label>First Name Column (optional):</label>
-            <select name="first_name_column">
-                <option value="">-- None --</option>
-                {% for col in first_columns %}
-                <option value="{{ col }}" {% if col == selected_first %}selected{% endif %}>{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
-            
-            <label>Last Name Column (optional):</label>
-            <select name="last_name_column">
-                <option value="">-- None --</option>
-                {% for col in last_columns %}
-                <option value="{{ col }}" {% if col == selected_last %}selected{% endif %}>{{ col }}</option>
-                {% endfor %}
-            </select><br><br>
+    {% if step == '2b' %}
+    <h2>Step 2b: Map Columns</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step='2b', event_id=event_id) }}">
+        <label>Phone Column:</label>
+        <select name="phone_column" required>
+            {% for col in phone_columns %}
+            <option value="{{ col }}" {% if col == selected_phone %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+        </select><br><br>
 
-            <div class="nav-buttons">
-                <a href="{{ url_for('eventcreate') }}?step=2">Back</a>
-                <button type="submit">Next</button>
-            </div>
-        </form>
-        {% if total is not none %}
-        <div class="summary">
-            <h3>File Summary</h3>
-            <p><strong>Total Records:</strong> {{ total }}</p>
-            <p><strong>Valid Records:</strong> {{ valid }}</p>
-            <p><strong>Rejected Records:</strong> {{ removed }}</p>
-            <form method="POST" action="{{ url_for('eventcreate', step='2b') }}">
-                <input type="hidden" name="proceed" value="yes">
-                <input type="hidden" name="phone_column" value="{{ selected_phone }}">
-                <input type="hidden" name="url_column" value="{{ selected_url }}">
-                <input type="hidden" name="first_name_column" value="{{ selected_first }}">
-                <input type="hidden" name="last_name_column" value="{{ selected_last }}">
-                <button type="submit">Proceed to Step 3</button>
-            </form>
-        </div>
-        {% endif %}
-        {% endif %}
+        <label>URL Column:</label>
+        <select name="url_column" required>
+            {% for col in url_columns %}
+            <option value="{{ col }}" {% if col == selected_url %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>First Name Column (optional):</label>
+        <select name="first_name_column">
+            <option value="">-- None --</option>
+            {% for col in first_columns %}
+            <option value="{{ col }}" {% if col == selected_first %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Last Name Column (optional):</label>
+        <select name="last_name_column">
+            <option value="">-- None --</option>
+            {% for col in last_columns %}
+            <option value="{{ col }}" {% if col == selected_last %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <a href="{{ url_for('eventcreate', step=2, event_id=event_id) }}">Back</a>
+        <button type="submit">Next</button>
+    </form>
+
+    <div>
+        <p>Total: {{ total }}</p>
+        <p>Valid: {{ valid }}</p>
+        <p>Removed: {{ removed }}</p>
     </div>
+    {% endif %}
 
     <!-- STEP 3 -->
-    <div class="step" id="step3">
-        {% if step == '3' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <h2>Step 3: Set Schedule</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step=4) }}">
-            <label>Event Date:</label>
-            <input type="date" name="event_date" value="{{ session.get('event_date', '') }}" required><br><br>
+    {% if step == '3' %}
+    <h2>Step 3: Set Schedule</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=4, event_id=event_id) }}">
+        <label>Date:</label>
+        <input type="date" name="event_date" value="{{ event_date }}" required><br><br>
 
-            <label>Event Time:</label>
-            <input type="time" name="event_time" value="{{ session.get('event_time', '') }}" required><br><br>
+        <label>Time:</label>
+        <input type="time" name="event_time" value="{{ event_time }}" required><br><br>
 
-            <label>Timezone:</label>
-            <select name="timezone" required>
-                {% set tz = session.get('timezone', '') %}
-                <option value="EST" {% if tz == 'EST' %}selected{% endif %}>EST</option>
-                <option value="CST" {% if tz == 'CST' %}selected{% endif %}>CST</option>
-                <option value="MST" {% if tz == 'MST' %}selected{% endif %}>MST</option>
-                <option value="PST" {% if tz == 'PST' %}selected{% endif %}>PST</option>
-            </select><br><br>
+        <label>Timezone:</label>
+        <select name="timezone" required>
+            <option value="EST" {% if timezone == 'EST' %}selected{% endif %}>EST</option>
+            <option value="CST" {% if timezone == 'CST' %}selected{% endif %}>CST</option>
+            <option value="MST" {% if timezone == 'MST' %}selected{% endif %}>MST</option>
+            <option value="PST" {% if timezone == 'PST' %}selected{% endif %}>PST</option>
+        </select><br><br>
 
-            <div class="nav-buttons">
-                <a href="{{ url_for('eventcreate') }}?step=2">Back</a>
-                <button type="submit">Next</button>
-            </div>
-        </form>
-        {% endif %}
-    </div>
+        <a href="{{ url_for('eventcreate', step=2b, event_id=event_id) }}">Back</a>
+        <button type="submit">Next</button>
+    </form>
+    {% endif %}
 
     <!-- STEP 4 -->
-    <div class="step" id="step4">
-        {% if step == '4' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <h2>Step 4: Message Content</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step=4) }}">
-            <label>Message Template:</label><br>
-            <textarea name="message_body" rows="5" cols="60" required>{{ session.get('message_body', '') }}</textarea><br><br>
+    {% if step == '4' %}
+    <h2>Step 4: Message</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=5, event_id=event_id) }}">
+        <textarea name="message_body" required>{{ message_body }}</textarea><br><br>
+        <label>Image URL (optional):</label>
+        <input type="text" name="image_url" value="{{ image_url }}"><br><br>
 
-            <label>Image Link (optional):</label>
-            <input type="text" name="image_url" value="{{ session.get('image_url', '') }}"><br><br>
-
-            <div class="nav-buttons">
-                <a href="{{ url_for('eventcreate') }}?step=3">Back</a>
-                <button type="submit">Next</button>
-            </div>
-        </form>
-        {% endif %}
-    </div>
+        <a href="{{ url_for('eventcreate', step=3, event_id=event_id) }}">Back</a>
+        <button type="submit">Next</button>
+    </form>
+    {% endif %}
 
     <!-- STEP 5 -->
-    <div class="step" id="step5">
-        {% if step == '5' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <h2>Step 5: Upload Sender Numbers</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step=6) }}" enctype="multipart/form-data">
-            <label>Upload From-Numbers File (CSV or TXT):</label><br>
-            <input type="file" name="from_file" required><br><br>
-
-            <div class="nav-buttons">
-                <a href="{{ url_for('eventcreate') }}?step=4">Back</a>
-                <button type="submit">Next</button>
-            </div>
-        </form>
-        {% endif %}
-    </div>
+    {% if step == '5' %}
+    <h2>Step 5: Upload Sender Numbers</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=6, event_id=event_id) }}" enctype="multipart/form-data">
+        <input type="file" name="from_file" required><br><br>
+        <a href="{{ url_for('eventcreate', step=4, event_id=event_id) }}">Back</a>
+        <button type="submit">Next</button>
+    </form>
+    {% endif %}
 
     <!-- STEP 6 -->
-    <div class="step" id="step6">
-        {% if step == '6' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <h2>Step 6: Approvers</h2>
-        <form method="POST" action="{{ url_for('eventcreate', step=7) }}">
-            <label>Approver Name:</label><br>
-            <input type="text" name="approver_name" value="{{ session.get('approver_name', '') }}" maxlength="50" required><br><br>
-            <label>Approver Phone Number:</label><br>
-            <input type="text" name="approver_phone" value="{{ session.get('approver_phone', '') }}" maxlength="20" required><br><br>
+    {% if step == '6' %}
+    <h2>Step 6: Approver Info</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=7, event_id=event_id) }}">
+        <label>Approver Name:</label>
+        <input type="text" name="approver_name" value="{{ approver_name }}" required><br><br>
 
-            <div class="nav-buttons">
-                <a href="{{ url_for('eventcreate') }}?step=5">Back</a>
-                <button type="submit">Next</button>
-            </div>
-        </form>
-        {% endif %}
-    </div>
+        <label>Approver Phone:</label>
+        <input type="text" name="approver_phone" value="{{ approver_phone }}" required><br><br>
+
+        <a href="{{ url_for('eventcreate', step=5, event_id=event_id) }}">Back</a>
+        <button type="submit">Next</button>
+    </form>
+    {% endif %}
 
     <!-- STEP 7 -->
-    <div class="step" id="step7">
-        {% if step == '7' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <h2>Step 7: Review and Save</h2>
-        <p>Total recipients uploaded: {{ total }}</p>
-        <p>Valid phone numbers: {{ valid }}</p>
-        <p>Removed (invalid or opted-out): {{ removed }}</p>
-        <p>Scheduled send time: {{ send_time }}</p>
-        <p>Event: {{ event_name }} | Project: {{ project_code }}</p>
-        <p>Approver: {{ approver_name }} | Phone: {{ approver_phone }}</p>
+    {% if step == '7' %}
+    <h2>Step 7: Review</h2>
+    <p>Total: {{ total }}</p>
+    <p>Valid: {{ valid }}</p>
+    <p>Removed: {{ removed }}</p>
+    <p>Send Time: {{ send_time }}</p>
+    <p>Event: {{ event_name }}</p>
+    <p>Project Code: {{ project_code }}</p>
+    <p>Approver: {{ approver_name }} ({{ approver_phone }})</p>
 
-        <form method="POST" action="{{ url_for('eventcreate_save') }}">
-            <button type="submit">Save Event</button>
-        </form>
+    <form method="POST" action="{{ url_for('eventcreate_save', event_id=event_id) }}">
+        <button type="submit">Save</button>
+    </form>
 
-        <div class="nav-buttons">
-            <a href="{{ url_for('eventcreate') }}?step=6">Back</a>
-            <form method="GET" action="{{ url_for('eventcreate') }}">
-                <input type="hidden" name="step" value="8">
-                <button type="submit">Next</button>
-            </form>
-        </div>
-        {% endif %}
-    </div>
+    <form method="GET" action="{{ url_for('eventcreate', event_id=event_id) }}">
+        <input type="hidden" name="step" value="8">
+        <button type="submit">Next</button>
+    </form>
+    {% endif %}
 
     <!-- STEP 8 -->
-    <div class="step" id="step8">
-        {% if step == '8' %}
-        {% if error %}
-            <div class="error">{{ error }}</div>
-        {% endif %}
-        <h2>Step 8: Test Message & Approve</h2>
-        {% if test_status %}
-            <div class="error">{{ test_status }}</div>
-        {% endif %}
-        <form method="POST" action="{{ url_for('eventcreate', step=8) }}">
-            <label>Send test to:</label>
-            <input name="test_number" placeholder="+1XXXXXXXXXX" required>
-            <button type="submit">Send Test Message</button>
-        </form>
+    {% if step == '8' %}
+    <h2>Step 8: Send Test</h2>
+    <form method="POST" action="{{ url_for('eventcreate', step=8, event_id=event_id) }}">
+        <input name="test_number" placeholder="+1XXXXXXXXXX" required>
+        <button type="submit">Send Test</button>
+    </form>
 
-        <form method="POST" action="{{ url_for('eventcreate_commit') }}">
-            <button type="submit">Approve & Commit</button>
-        </form>
-        <div class="nav-buttons">
-            <a href="{{ url_for('eventcreate') }}?step=7">Back</a>
-        </div>
-        {% endif %}
-    </div>
-
-    <script>
-        const step = new URLSearchParams(window.location.search).get('step') || '1';
-        const activeStep = step.replace(/[^a-zA-Z0-9]/g, '');
-        const el = document.getElementById('step' + activeStep);
-        if (el) el.classList.add('active');
-    </script>
+    <form method="POST" action="{{ url_for('eventcreate_commit') }}">
+        <button type="submit">Commit Event</button>
+    </form>
+    {% endif %}
 </body>
 </html>
