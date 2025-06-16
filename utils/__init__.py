@@ -22,10 +22,10 @@ def load_event(event_id):
     path = get_event_path(event_id)
     if os.path.exists(path):
         try:
-            with open(path, 'r') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except json.JSONDecodeError:
-            print(f"Warning: Could not decode JSON for event {event_id}")
+        except json.JSONDecodeError as e:
+            print(f"Warning: Could not decode JSON for event {event_id} - {e}")
             return {}
     return {}
 
