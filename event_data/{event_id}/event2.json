@@ -1,0 +1,29 @@
+import os
+import json
+
+def get_event_path(event_id):
+    dir_path = os.path.join("event_data", str(event_id))
+    os.makedirs(dir_path, exist_ok=True)
+    return os.path.join(dir_path, "event.json")
+
+def load_event(event_id):
+    path = get_event_path(event_id)
+    if os.path.exists(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+                # check for corrupted content like b'{...}'
+                if content.startswith("b'") or content.startswith('b"'):
+                    print(f"[Corrupted JSON] Deleting malformed file: {path}")
+                    os.remove(path)
+                    return {}
+
+                return json.loads(content)
+
+        except (json.JSONDecodeError, Exception) as e:
+            print(f"[load_event error] {e}")
+            os.remove(path)
+            return {}
+
+    return {}
