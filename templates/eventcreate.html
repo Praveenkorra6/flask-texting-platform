@@ -98,7 +98,7 @@
             <option value="{{ tz }}" {% if timezone == tz %}selected{% endif %}>{{ tz }}</option>
             {% endfor %}
         </select><br><br>
-        <a href="{{ url_for('eventcreate', step=2b, event_id=event_id) }}">Back</a>
+        <a href="{{ url_for('eventcreate', step='2b', event_id=event_id) }}">Back</a>
         <button type="submit">Next</button>
     </form>
     {% endif %}
