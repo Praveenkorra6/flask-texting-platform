@@ -5,12 +5,10 @@ import os
 import re
 import uuid
 import shutil
-from .helpers import normalize_us_number
 from utils import normalize_us_number
 from werkzeug.utils import secure_filename
 from twilio.rest import Client
 from datetime import datetime, timedelta
-from utils import normalize_us_number
 import mysql.connector
 
 app = Flask(__name__)
