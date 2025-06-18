@@ -1,8 +1,21 @@
 import os
 import json
+import re
+import pandas as pd
 
 # Folder where all event JSONs will be stored
 BASE_DIR = "event_data"
+
+def normalize_us_number(raw):
+    if pd.isna(raw):
+        return None
+    num = re.sub(r'\D', '', str(raw))
+    if len(num) == 10:
+        return '+1' + num
+    elif len(num) == 11 and num.startswith('1'):
+        return '+' + num
+    return None
+
 
 def get_event_path(event_id):
     """
