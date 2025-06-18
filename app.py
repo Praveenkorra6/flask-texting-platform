@@ -37,6 +37,17 @@ def eventcreate():
     step = request.args.get('step', '1')
     event_id = request.args.get('event_id')
 
+    US_STATES = [
+        "National", "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+        "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois",
+        "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+        "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana",
+        "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York",
+        "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania",
+        "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah",
+        "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+    ]
+
     if step == '1':
         if request.method == 'POST':
             event_name = request.form['event_name']
@@ -53,7 +64,7 @@ def eventcreate():
             cursor.close()
             conn.close()
             return redirect(url_for('eventcreate', step='2', event_id=event_id))
-        return render_template('eventcreate.html', step='1', event_id=event_id)
+        return render_template('eventcreate.html', step='1', event_id=event_id, state_list=US_STATES)
 
     elif step == '2':
         if request.method == 'POST':
@@ -186,7 +197,6 @@ def eventcreate():
                 test_status = f"Error sending message: {e}"
         return render_template('eventcreate.html', step='8', event_id=event_id, test_status=test_status)
 
-
 @app.route('/eventcreate/save', methods=['POST'])
 def eventcreate_save():
     return redirect(url_for('eventcreate', step='8'))
@@ -198,7 +208,7 @@ def eventcreate_commit():
 @app.errorhandler(400)
 def handle_bad_request(e):
     return render_template('400.html'), 400
-    
+
 @app.route('/delete_event_data/<event_id>')
 def delete_event_data(event_id):
     folder_path = os.path.join("event_data", event_id)
@@ -209,4 +219,3 @@ def delete_event_data(event_id):
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
-
