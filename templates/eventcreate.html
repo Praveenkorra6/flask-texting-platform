@@ -20,6 +20,12 @@
         <input type="text" name="event_name" value="{{ event_name }}" required><br><br>
         <label>Project Code:</label><br>
         <input type="text" name="project_code" value="{{ project_code }}" required><br><br>
+        <label>State:</label><br>
+        <select name="state" required>
+            {% for abbr in ['National','AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'] %}
+            <option value="{{ abbr }}" {% if state == abbr %}selected{% endif %}>{{ abbr }}</option>
+            {% endfor %}
+        </select><br><br>
         <button type="submit">Next</button>
     </form>
     {% endif %}
@@ -71,7 +77,6 @@
         <a href="{{ url_for('eventcreate', step=2, event_id=event_id) }}">Back</a>
         <button type="submit">Next</button>
     </form>
-
     <div>
         <p>Total: {{ total }}</p>
         <p>Valid: {{ valid }}</p>
@@ -85,18 +90,14 @@
     <form method="POST" action="{{ url_for('eventcreate', step=4, event_id=event_id) }}">
         <label>Date:</label>
         <input type="date" name="event_date" value="{{ event_date }}" required><br><br>
-
         <label>Time:</label>
         <input type="time" name="event_time" value="{{ event_time }}" required><br><br>
-
         <label>Timezone:</label>
         <select name="timezone" required>
-            <option value="EST" {% if timezone == 'EST' %}selected{% endif %}>EST</option>
-            <option value="CST" {% if timezone == 'CST' %}selected{% endif %}>CST</option>
-            <option value="MST" {% if timezone == 'MST' %}selected{% endif %}>MST</option>
-            <option value="PST" {% if timezone == 'PST' %}selected{% endif %}>PST</option>
+            {% for tz in ['EST','CST','MST','PST'] %}
+            <option value="{{ tz }}" {% if timezone == tz %}selected{% endif %}>{{ tz }}</option>
+            {% endfor %}
         </select><br><br>
-
         <a href="{{ url_for('eventcreate', step=2b, event_id=event_id) }}">Back</a>
         <button type="submit">Next</button>
     </form>
@@ -109,7 +110,6 @@
         <textarea name="message_body" required>{{ message_body }}</textarea><br><br>
         <label>Image URL (optional):</label>
         <input type="text" name="image_url" value="{{ image_url }}"><br><br>
-
         <a href="{{ url_for('eventcreate', step=3, event_id=event_id) }}">Back</a>
         <button type="submit">Next</button>
     </form>
@@ -131,10 +131,8 @@
     <form method="POST" action="{{ url_for('eventcreate', step=7, event_id=event_id) }}">
         <label>Approver Name:</label>
         <input type="text" name="approver_name" value="{{ approver_name }}" required><br><br>
-
         <label>Approver Phone:</label>
         <input type="text" name="approver_phone" value="{{ approver_phone }}" required><br><br>
-
         <a href="{{ url_for('eventcreate', step=5, event_id=event_id) }}">Back</a>
         <button type="submit">Next</button>
     </form>
@@ -150,11 +148,9 @@
     <p>Event: {{ event_name }}</p>
     <p>Project Code: {{ project_code }}</p>
     <p>Approver: {{ approver_name }} ({{ approver_phone }})</p>
-
     <form method="POST" action="{{ url_for('eventcreate_save', event_id=event_id) }}">
         <button type="submit">Save</button>
     </form>
-
     <form method="GET" action="{{ url_for('eventcreate', event_id=event_id) }}">
         <input type="hidden" name="step" value="8">
         <button type="submit">Next</button>
@@ -168,7 +164,6 @@
         <input name="test_number" placeholder="+1XXXXXXXXXX" required>
         <button type="submit">Send Test</button>
     </form>
-
     <form method="POST" action="{{ url_for('eventcreate_commit') }}">
         <button type="submit">Commit Event</button>
     </form>
