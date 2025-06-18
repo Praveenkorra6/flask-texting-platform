@@ -65,19 +65,19 @@ def eventcreate():
 
     elif step == '2':
         if request.method == 'POST':
-            if 'recipient_file' not in request.files:
-                return "Error: No file part in form submission", 400
-    
+            if 'recipient_file' not in request.files or request.files['recipient_file'].filename == '':
+                return render_template('eventcreate.html', step='2', event_id=event_id, error="Please upload a file.")
+            
             file = request.files['recipient_file']
-            if file.filename == '':
-                return "Error: No selected file", 400
-    
             path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
             file.save(path)
             df = pd.read_csv(path, dtype=str)
             columns = df.columns.tolist()
             return render_template('eventcreate.html', step='2b', event_id=event_id, columns=columns, file_path=path)
+    
+        # For GET request — just show the upload page
         return render_template('eventcreate.html', step='2', event_id=event_id)
+
 
 
     elif step == '2b':
