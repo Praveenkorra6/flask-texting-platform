@@ -1,5 +1,6 @@
-flask
-pandas
+Flask
 flask-session
 twilio
-python-dotenv
+pandas
+mysql-connector-python
+gunicorn
