@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Campaign</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Create a New Campaign</h1>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    {% if success %}
+        <p style="color: green;">{{ success }}</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('create_campaign') }}">
+        <label for="campaign_name">Campaign Name:</label><br>
+        <input type="text" id="campaign_name" name="campaign_name" required><br><br>
+
+        <label for="state">State:</label><br>
+        <input type="text" id="state" name="state" placeholder="e.g., FL, TX, CA" required><br><br>
+
+        <label for="project_code">Project Code:</label><br>
+        <input type="text" id="project_code" name="project_code" placeholder="e.g., AR1234" required><br><br>
+
+        <button type="submit">Create Campaign</button>
+    </form>
+</body>
+</html>
