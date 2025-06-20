@@ -33,31 +33,35 @@ def get_db():
         database=os.getenv("MYSQL_DATABASE")
     )
 
-@app.route('/campaigncreate', methods=['GET', 'POST'])
-def campaigncreate():
+@app.route('/createcampaign', methods=['GET', 'POST'])
+def create_campaign():
     if request.method == 'POST':
         try:
-            name = request.form['campaign_name']
-            state = request.form['state']
             project_code = request.form['project_code']
+            name = request.form['name']
+            state = request.form['state']
 
             conn = get_db()
             cursor = conn.cursor()
 
-            cursor.execute("INSERT INTO campaigns (name, state, project_code) VALUES (%s, %s, %s)",
-                           (name, state, project_code))
+            # Insert into campaigns table
+            cursor.execute("""
+                INSERT INTO campaigns (project_code, name, state)
+                VALUES (%s, %s, %s)
+            """, (project_code, name, state))
 
             conn.commit()
             cursor.close()
             conn.close()
 
-            return redirect(url_for('index'))  # or wherever you want
+            return redirect(url_for('eventcreate', step='1'))
 
         except Exception as e:
-            print(f"Campaign creation failed: {e}")
-            return render_template('campaigncreate.html', error=str(e))
+            print("Campaign creation failed:", e)
+            return render_template('eventcampaign.html', error=str(e))
 
-    return render_template('campaigncreate.html')
+    return render_template('eventcampaign.html')
+
 
 
 
