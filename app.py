@@ -11,6 +11,9 @@ from werkzeug.utils import secure_filename
 from twilio.rest import Client
 from datetime import datetime, timedelta
 import mysql.connector
+from dotenv import load_dotenv
+load_dotenv()
+
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
@@ -112,7 +115,9 @@ def eventcreate():
             file.save(path)
             df = pd.read_csv(path, dtype=str)
             columns = df.columns.tolist()
-            return redirect(url_for('eventcreate', step='2b', event_id=event_id, file_path=path))
+            session['file_path'] = path
+            return redirect(url_for('eventcreate', step='2b', event_id=event_id))
+
     
         # For GET request — just show the upload page
         return render_template('eventcreate.html', step='2', event_id=event_id)
@@ -123,7 +128,7 @@ def eventcreate():
         if request.method == 'POST':
             try:
                 event_id = request.form.get('event_id') or request.args.get('event_id')
-                file_path = request.form['file_path']
+                file_path = session.get('file_path') 
                 df = pd.read_csv(file_path, dtype=str)
     
                 phone_col = request.form['phone_column']
