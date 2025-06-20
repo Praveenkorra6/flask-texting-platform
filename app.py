@@ -84,7 +84,7 @@ def eventcreate():
     elif step == '2b':
         if request.method == 'POST':
             try:
-                event_id = request.args('event_id') 
+                event_id = request.form.get('event_id') or request.args.get('event_id')
                 file_path = request.form['file_path']
                 df = pd.read_csv(file_path, dtype=str)
     
@@ -108,10 +108,10 @@ def eventcreate():
                 return redirect(url_for('eventcreate', step='3', event_id=event_id))
     
             except Exception as e:
-                import traceback
                 print(f"Step 2b POST failed: {e}")
                 traceback.print_exc()
                 return render_template('eventcreate.html', step='2b', event_id=event_id, file_path=file_path, columns=[], error=str(e))
+
 
 
 
