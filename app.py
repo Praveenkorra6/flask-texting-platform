@@ -33,6 +33,44 @@ def get_db():
         database=os.getenv("MYSQL_DATABASE")
     )
 
+@app.route('/create_campaign', methods=['GET', 'POST'])
+def create_campaign():
+    if request.method == 'POST':
+        campaign_name = request.form.get('campaign_name')
+        state = request.form.get('state')
+        project_code = request.form.get('project_code')
+
+        if not all([campaign_name, state, project_code]):
+            return render_template('eventcampaign.html', error="All fields are required.")
+
+        try:
+            conn = get_db()
+            cursor = conn.cursor()
+
+            # Check for duplicate project_code
+            cursor.execute("SELECT id FROM campaigns WHERE id = %s", (project_code,))
+            if cursor.fetchone():
+                return render_template('eventcampaign.html', error="Project Code already exists.")
+
+            cursor.execute("""
+                INSERT INTO campaigns (id, name, state)
+                VALUES (%s, %s, %s)
+            """, (project_code, campaign_name, state))
+
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+            return render_template('eventcampaign.html', success="Campaign created successfully!")
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return render_template('eventcampaign.html', error=f"Error: {str(e)}")
+
+    return render_template('eventcampaign.html')
+
+
 @app.route('/eventcreate', methods=['GET', 'POST'])
 def eventcreate():
     step = request.args.get('step', '1')
