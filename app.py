@@ -33,42 +33,32 @@ def get_db():
         database=os.getenv("MYSQL_DATABASE")
     )
 
-@app.route('/create_campaign', methods=['GET', 'POST'])
-def create_campaign():
+@app.route('/campaigncreate', methods=['GET', 'POST'])
+def campaigncreate():
     if request.method == 'POST':
-        campaign_name = request.form.get('campaign_name')
-        state = request.form.get('state')
-        project_code = request.form.get('project_code')
-
-        if not all([campaign_name, state, project_code]):
-            return render_template('eventcampaign.html', error="All fields are required.")
-
         try:
+            name = request.form['campaign_name']
+            state = request.form['state']
+            project_code = request.form['project_code']
+
             conn = get_db()
             cursor = conn.cursor()
 
-            # Check for duplicate project_code
-            cursor.execute("SELECT id FROM campaigns WHERE id = %s", (project_code,))
-            if cursor.fetchone():
-                return render_template('eventcampaign.html', error="Project Code already exists.")
-
-            cursor.execute("""
-                INSERT INTO campaigns (id, name, state)
-                VALUES (%s, %s, %s)
-            """, (project_code, campaign_name, state))
+            cursor.execute("INSERT INTO campaigns (name, state, project_code) VALUES (%s, %s, %s)",
+                           (name, state, project_code))
 
             conn.commit()
             cursor.close()
             conn.close()
 
-            return render_template('eventcampaign.html', success="Campaign created successfully!")
+            return redirect(url_for('index'))  # or wherever you want
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return render_template('eventcampaign.html', error=f"Error: {str(e)}")
+            print(f"Campaign creation failed: {e}")
+            return render_template('campaigncreate.html', error=str(e))
 
-    return render_template('eventcampaign.html')
+    return render_template('campaigncreate.html')
+
 
 
 @app.route('/eventcreate', methods=['GET', 'POST'])
