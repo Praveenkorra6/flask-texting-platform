@@ -33,6 +33,11 @@ def get_db():
         database=os.getenv("MYSQL_DATABASE")
     )
 
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+
 @app.route('/createcampaign', methods=['GET', 'POST'])
 def create_campaign():
     if request.method == 'POST':
