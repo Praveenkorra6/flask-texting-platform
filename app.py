@@ -63,9 +63,9 @@ def create_campaign():
 
         except Exception as e:
             print("Campaign creation failed:", e)
-            return render_template('eventcampaign.html', error=str(e))
+            return render_template('campaigncreate.html', error=str(e))
 
-    return render_template('eventcampaign.html')
+    return render_template('campaigncreate.html')
 
 
 
