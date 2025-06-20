@@ -73,7 +73,7 @@ def eventcreate():
             file.save(path)
             df = pd.read_csv(path, dtype=str)
             columns = df.columns.tolist()
-            return render_template('eventcreate.html', step='2b', event_id=event_id, file_path=path)
+            return redirect(url_for('eventcreate', step='2b', event_id=event_id, file_path=path))
     
         # For GET request — just show the upload page
         return render_template('eventcreate.html', step='2', event_id=event_id)
