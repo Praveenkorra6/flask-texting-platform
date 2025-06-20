@@ -84,7 +84,7 @@ def eventcreate():
     elif step == '2b':
         if request.method == 'POST':
             try:
-                event_id = request.args.get('event_id') 
+                event_id = request.args('event_id') 
                 file_path = request.form['file_path']
                 df = pd.read_csv(file_path, dtype=str)
     
