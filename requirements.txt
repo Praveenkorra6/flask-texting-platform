@@ -4,3 +4,4 @@ twilio
 pandas
 mysql-connector-python
 gunicorn
+python-dotenv
