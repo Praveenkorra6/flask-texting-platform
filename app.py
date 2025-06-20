@@ -84,29 +84,14 @@ def eventcreate():
     elif step == '2b':
         if request.method == 'POST':
             try:
+                event_id = request.args.get('event_id') 
                 file_path = request.form['file_path']
-                if not file_path or not os.path.exists(file_path):
-                    return render_template('eventcreate.html', step='2', event_id=event_id, error="Uploaded file is missing or was deleted.")
-    
                 df = pd.read_csv(file_path, dtype=str)
-                columns = df.columns.tolist()
     
                 phone_col = request.form['phone_column']
                 url_col = request.form['url_column']
                 first_col = request.form.get('first_name_column', '')
                 last_col = request.form.get('last_name_column', '')
-    
-                # Validate column names
-                for col in [phone_col, url_col]:
-                    if col not in df.columns:
-                        return render_template(
-                            'eventcreate.html',
-                            step='2b',
-                            event_id=event_id,
-                            columns=columns,
-                            file_path=file_path,
-                            error=f"Selected column '{col}' not found in uploaded file."
-                        )
     
                 df['clean_phone'] = df[phone_col].apply(normalize_us_number)
                 df = df[df['clean_phone'].notnull() & df[url_col].notnull() & (df[url_col].str.strip() != '')]
@@ -115,21 +100,19 @@ def eventcreate():
     
                 conn = get_db()
                 cursor = conn.cursor()
-                cursor.execute(
-                    "UPDATE events SET validated_file=%s, recipient_count=%s WHERE id=%s",
-                    (valid_path, len(df), event_id)
-                )
+                cursor.execute("UPDATE events SET validated_file=%s, recipient_count=%s WHERE id=%s", (valid_path, len(df), event_id))
                 conn.commit()
                 cursor.close()
                 conn.close()
     
                 return redirect(url_for('eventcreate', step='3', event_id=event_id))
-            
+    
             except Exception as e:
-                error_msg = f"Step 2b POST failed: {e}"
-                print(error_msg)
-                traceback.print_exc()  # ← Logs full error stack trace
-                return render_template('eventcreate.html', step='2b', event_id=event_id, error=error_msg, file_path=file_path, columns=columns)
+                import traceback
+                print(f"Step 2b POST failed: {e}")
+                traceback.print_exc()
+                return render_template('eventcreate.html', step='2b', event_id=event_id, file_path=file_path, columns=[], error=str(e))
+
 
 
 
