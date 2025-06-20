@@ -40,49 +40,47 @@
     </form>
     {% endif %}
 
-    <!-- STEP 2b -->
-    {% if step == '2b' %}
-    <h2>Step 2b: Map Columns</h2>
-    <form method="POST" action="{{ url_for('eventcreate', step='2b', event_id=event_id) }}">
-        <label>Phone Column:</label>
-        <select name="phone_column" required>
-            {% for col in phone_columns %}
-            <option value="{{ col }}" {% if col == selected_phone %}selected{% endif %}>{{ col }}</option>
-            {% endfor %}
-        </select><br><br>
+<!-- STEP 2b -->
+{% if step == '2b' %}
+<h2>Step 2b: Map Columns</h2>
+<form method="POST" action="{{ url_for('eventcreate', step='2b', event_id=event_id) }}">
+    <input type="hidden" name="file_path" value="{{ file_path }}">
 
-        <label>URL Column:</label>
-        <select name="url_column" required>
-            {% for col in url_columns %}
-            <option value="{{ col }}" {% if col == selected_url %}selected{% endif %}>{{ col }}</option>
-            {% endfor %}
-        </select><br><br>
+    <label>Phone Column:</label>
+    <select name="phone_column" required>
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br><br>
 
-        <label>First Name Column (optional):</label>
-        <select name="first_name_column">
-            <option value="">-- None --</option>
-            {% for col in first_columns %}
-            <option value="{{ col }}" {% if col == selected_first %}selected{% endif %}>{{ col }}</option>
-            {% endfor %}
-        </select><br><br>
+    <label>URL Column:</label>
+    <select name="url_column" required>
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br><br>
 
-        <label>Last Name Column (optional):</label>
-        <select name="last_name_column">
-            <option value="">-- None --</option>
-            {% for col in last_columns %}
-            <option value="{{ col }}" {% if col == selected_last %}selected{% endif %}>{{ col }}</option>
-            {% endfor %}
-        </select><br><br>
+    <label>First Name Column (optional):</label>
+    <select name="first_name_column">
+        <option value="">-- None --</option>
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br><br>
 
-        <a href="{{ url_for('eventcreate', step=2, event_id=event_id) }}">Back</a>
-        <button type="submit">Next</button>
-    </form>
-    <div>
-        <p>Total: {{ total }}</p>
-        <p>Valid: {{ valid }}</p>
-        <p>Removed: {{ removed }}</p>
-    </div>
-    {% endif %}
+    <label>Last Name Column (optional):</label>
+    <select name="last_name_column">
+        <option value="">-- None --</option>
+        {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <a href="{{ url_for('eventcreate', step=2, event_id=event_id) }}">Back</a>
+    <button type="submit">Next</button>
+</form>
+{% endif %}
+
 
     <!-- STEP 3 -->
     {% if step == '3' %}
