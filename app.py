@@ -5,6 +5,7 @@ import os
 import re
 import uuid
 import shutil
+import traceback 
 from utils import normalize_us_number
 from werkzeug.utils import secure_filename
 from twilio.rest import Client
@@ -125,7 +126,10 @@ def eventcreate():
                 return redirect(url_for('eventcreate', step='3', event_id=event_id))
             
             except Exception as e:
-                return f"Step 2b POST failed: {e}", 500
+                error_msg = f"Step 2b POST failed: {e}"
+                print(error_msg)
+                traceback.print_exc()  # ← Logs full error stack trace
+                return render_template('eventcreate.html', step='2b', event_id=event_id, error=error_msg, file_path=file_path, columns=columns)
 
 
 
